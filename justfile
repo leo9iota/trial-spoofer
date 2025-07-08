@@ -9,7 +9,6 @@ default:
 setup:
     @echo "Setting up development environment..."
     uv sync --dev
-    @echo "Development environment ready!"
 
 # Install dependencies
 install:
@@ -111,10 +110,6 @@ audit:
 # Generate requirements.txt for compatibility
 requirements:
     uv export --format requirements-txt --output-file requirements.txt
-
-# Start development server (if applicable)
-serve port="8000":
-    uv run python -m http.server {{port}}
 
 # Run interactive Python shell
 shell:
