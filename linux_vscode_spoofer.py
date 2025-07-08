@@ -9,7 +9,7 @@ Features
 ~~~~~~~~
 1. MAC:               Spoof MAC of the first active, non-loopback NIC.
 2. Machine ID:        Regenerate machine-id.
-3. Filesystem UUID:   Randomize root-filesystem UUID and patch fstab and crypttab.
+3. Filesystem UUID:   Randomize root-filesystem UUID.
 4. Hostname:          Set a fresh hostname.
 5. VS Code Cache:     Purge VS Code, Cursor, and Augment Code caches.
 6. New User:          Create a throw-away user.
@@ -25,6 +25,7 @@ Options
 """
 
 from __future__ import annotations
+
 import argparse
 import os
 import random
@@ -33,13 +34,12 @@ import shutil
 import subprocess as sp
 import sys
 from pathlib import Path
-from typing import Optional
 
 
 # ─────── #
 # Helpers #
 # ─────── #
-def run(cmd: str, capture: bool = False, check: bool = True) -> Optional[str]:
+def run(cmd: str, capture: bool = False, check: bool = True) -> str | None:
     """Thin wrapper around subprocess.run("cmd", shell=True …)."""
     res = sp.run(
         cmd,
