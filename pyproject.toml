@@ -36,7 +36,7 @@ dev = [
 ]
 
 [project.scripts]
-vscode-spoof = "vscode_spoofer.main:main"
+vscode-spoof = "main:main"
 
 [project.urls]
 Homepage = "https://github.com/leo9iota/vscode-spoofer"
