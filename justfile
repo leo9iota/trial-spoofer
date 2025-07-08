@@ -1,0 +1,133 @@
+# justfile for vscode-spoofer Python project
+# Run `just` to see available commands
+
+# Default recipe - show available commands
+default:
+    @just --list
+
+# Setup development environment
+setup:
+    @echo "Setting up development environment..."
+    uv sync --dev
+    @echo "Development environment ready!"
+
+# Install dependencies
+install:
+    uv sync
+
+# Add a new dependency
+add package:
+    uv add {{package}}
+
+# Add a development dependency
+add-dev package:
+    uv add --dev {{package}}
+
+# Run the main application
+run *args:
+    uv run python main.py {{args}}
+
+# Run the existing spoofer script
+spoof *args:
+    uv run python linux_vscode_spoofer.py {{args}}
+
+# Run tests
+test:
+    uv run pytest
+
+# Run tests with coverage
+test-cov:
+    uv run pytest --cov=src --cov-report=html --cov-report=term
+
+# Format code with black
+format:
+    uv run black .
+
+# Check code formatting
+format-check:
+    uv run black --check .
+
+# Lint code with ruff
+lint:
+    uv run ruff check .
+
+# Fix linting issues
+lint-fix:
+    uv run ruff check --fix .
+
+# Type check with mypy
+typecheck:
+    uv run mypy .
+
+# Run all quality checks
+check: format-check lint typecheck
+
+# Fix all auto-fixable issues
+fix: format lint-fix
+
+# Clean up build artifacts and cache
+clean:
+    rm -rf .pytest_cache/
+    rm -rf htmlcov/
+    rm -rf .coverage
+    rm -rf dist/
+    rm -rf build/
+    rm -rf *.egg-info/
+    find . -type d -name __pycache__ -exec rm -rf {} +
+    find . -type f -name "*.pyc" -delete
+
+# Build the package
+build:
+    uv build
+
+# Install the package in development mode
+dev-install:
+    uv pip install -e .
+
+# Show project info
+info:
+    @echo "Project: vscode-spoofer"
+    @echo "Python version: $(uv run python --version)"
+    @echo "UV version: $(uv --version)"
+    @echo "Dependencies:"
+    @uv tree
+
+# Update all dependencies
+update:
+    uv lock --upgrade
+
+# Create a new virtual environment
+venv:
+    uv venv
+
+# Activate virtual environment (shows command to run)
+activate:
+    @echo "Run: source .venv/bin/activate"
+
+# Run security audit
+audit:
+    uv run pip-audit
+
+# Generate requirements.txt for compatibility
+requirements:
+    uv export --format requirements-txt --output-file requirements.txt
+
+# Start development server (if applicable)
+serve port="8000":
+    uv run python -m http.server {{port}}
+
+# Run interactive Python shell
+shell:
+    uv run python
+
+# Run IPython shell (if installed)
+ipython:
+    uv run ipython
+
+# Install pre-commit hooks
+pre-commit-install:
+    uv run pre-commit install
+
+# Run pre-commit on all files
+pre-commit:
+    uv run pre-commit run --all-files
