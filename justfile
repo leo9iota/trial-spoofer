@@ -26,8 +26,12 @@ add-dev package:
 run *args:
     uv run python main.py {{args}}
 
-# Run the existing spoofer script
+# Run the new spoofer implementation
 spoof *args:
+    uv run python src/main.py {{args}}
+
+# Run the original spoofer script
+spoof-original *args:
     uv run python linux_vscode_spoofer.py {{args}}
 
 # Run tests
