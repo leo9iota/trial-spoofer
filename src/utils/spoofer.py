@@ -29,7 +29,8 @@ def spoof_mac_addr() -> bool:
             log("No active non-loopback NIC found - skipping MAC spoof.")
             return False
     except Exception as e:
-        log(f"Failed to spoof MAC address: {e}")
+        error_msg: str = str(e)
+        log(f"Failed to spoof MAC address: {error_msg}")
         return False
 
 
@@ -41,7 +42,8 @@ def spoof_machine_id() -> bool:
         run("systemd-machine-id-setup")
         return True
     except Exception as e:
-        log(f"Failed to regenerate machine ID: {e}")
+        error_msg: str = str(e)
+        log(f"Failed to regenerate machine ID: {error_msg}")
         return False
 
 
@@ -72,19 +74,24 @@ def spoof_fs_uuid() -> bool:
         if new_uuid:
             log(f"Updating /etc/fstab with {new_uuid}")
             fstab_path: Path = Path("/etc/fstab")
-            fstab: str = fstab_path.read_text()
+            fstab_content: str = fstab_path.read_text()
             uuid_pattern: str = r"UUID=[A-Fa-f0-9-]+"
-            fstab = re.sub(uuid_pattern, f"UUID={new_uuid}", fstab, count=1)
-            fstab_path.write_text(fstab)
+            updated_fstab: str = re.sub(
+                uuid_pattern, f"UUID={new_uuid}", fstab_content, count=1
+            )
+            fstab_path.write_text(updated_fstab)
 
             # Update crypttab if present
             crypttab_path: Path = Path("/etc/crypttab")
             if crypttab_path.exists():
-                txt: str = crypttab_path.read_text()
-                txt = re.sub(uuid_pattern, f"UUID={new_uuid}", txt)
-                crypttab_path.write_text(txt)
+                crypttab_content: str = crypttab_path.read_text()
+                updated_crypttab: str = re.sub(
+                    uuid_pattern, f"UUID={new_uuid}", crypttab_content
+                )
+                crypttab_path.write_text(updated_crypttab)
 
         return True
     except Exception as e:
-        log(f"Failed to spoof filesystem UUID: {e}")
+        error_msg: str = str(e)
+        log(f"Failed to spoof filesystem UUID: {error_msg}")
         return False

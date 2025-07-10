@@ -25,9 +25,8 @@ def run(cmd: str, capture: bool = False, check: bool = True) -> str | None:
     )
     if check and res.returncode != 0:
         stdout_output: str = res.stdout or ""
-        raise RuntimeError(
-            f"Command failed ({res.returncode}): {cmd}\n{stdout_output}"
-        )
+        error_message: str = f"Command failed ({res.returncode}): {cmd}\n{stdout_output}"
+        raise RuntimeError(error_message)
     return res.stdout.strip() if capture and res.stdout else None
 
 
@@ -39,7 +38,8 @@ def ask(msg: str, default_yes: bool, assume_yes: bool) -> bool:
     no: set[str] = {"n", "no"}
     prompt: str = "[Y/n]" if default_yes else "[y/N]"
     while True:
-        ans: str = input(f"{msg} {prompt}: ").strip().lower()
+        prompt_text: str = f"{msg} {prompt}: "
+        ans: str = input(prompt_text).strip().lower()
         if ans == "":
             return default_yes
         if ans in yes:

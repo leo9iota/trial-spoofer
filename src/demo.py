@@ -98,18 +98,16 @@ def main() -> None:
     console.print()
 
     # Confirmation prompt
-    proceed: bool = Confirm.ask(
-        "🚀 [bold cyan]Proceed with demo spoofing operations?[/bold cyan]",
-        default=True,
-    )
+    demo_prompt: str = "🚀 [bold cyan]Proceed with demo spoofing operations?[/bold cyan]"
+    proceed: bool = Confirm.ask(demo_prompt, default=True)
     if not proceed:
-        console.print(
-            Panel(
-                "Demo cancelled by user.",
-                title="Cancelled",
-                style="yellow",
-            )
+        cancel_message: str = "Demo cancelled by user."
+        cancel_panel: Panel = Panel(
+            cancel_message,
+            title="Cancelled",
+            style="yellow",
         )
+        console.print(cancel_panel)
         return
 
     # Demo operations
@@ -140,11 +138,12 @@ def main() -> None:
             "Starting operations...", total=len(operations)
         )
 
-        for name in operations:
-            progress.update(task, description=f"🔄 Processing {name}...")
+        for operation_name in operations:
+            progress_description: str = f"🔄 Processing {operation_name}..."
+            progress.update(task, description=progress_description)
 
             success: bool = demo_operation()
-            results[name] = success
+            results[operation_name] = success
 
             progress.update(task, advance=1)
 
@@ -156,19 +155,25 @@ def main() -> None:
     total_count: int = len(results)
 
     if success_count == total_count:
-        final_panel: Panel = Panel(
+        success_message: str = (
             "🎉 All demo operations completed successfully!\n\n"
             "💡 [bold yellow]This was just a demo[/bold yellow] - no actual "
-            "system changes were made.",
+            "system changes were made."
+        )
+        final_panel: Panel = Panel(
+            success_message,
             title="✅ Demo Complete",
             style="bright_green",
         )
     else:
-        final_panel = Panel(
+        partial_message: str = (
             f"⚠️  {success_count}/{total_count} demo operations completed "
             "successfully.\n\n"
             "💡 [bold yellow]This was just a demo[/bold yellow] - no actual "
-            "system changes were made.",
+            "system changes were made."
+        )
+        final_panel = Panel(
+            partial_message,
             title="⚠️  Demo Complete",
             style="yellow",
         )

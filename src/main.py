@@ -109,14 +109,16 @@ def main() -> None:
     try:
         _inv_user, home = root_check()
     except SystemExit:
-        console.print(
-            Panel(
-                "❌ This script requires root privileges.\n"
-                "Please run with sudo.",
-                title="Permission Error",
-                style="red",
-            )
+        error_message: str = (
+            "❌ This script requires root privileges.\n"
+            "Please run with sudo."
         )
+        error_panel: Panel = Panel(
+            error_message,
+            title="Permission Error",
+            style="red",
+        )
+        console.print(error_panel)
         sys.exit(1)
 
     # Display header
@@ -134,13 +136,13 @@ def main() -> None:
             default=True,
         )
         if not proceed:
-            console.print(
-                Panel(
-                    "Operation cancelled by user.",
-                    title="Cancelled",
-                    style="yellow",
-                )
+            cancel_message: str = "Operation cancelled by user."
+            cancel_panel: Panel = Panel(
+                cancel_message,
+                title="Cancelled",
+                style="yellow",
             )
+            console.print(cancel_panel)
             return
 
     # Progress tracking
@@ -154,11 +156,15 @@ def main() -> None:
     ]
 
     # Add user creation if requested
+    user_prompt: str = "👤 Create throw-away user 'vscode_sandbox'?"
     create_user_confirmed: bool = assume_yes or Confirm.ask(
-        "👤 Create throw-away user 'vscode_sandbox'?", default=False
+        user_prompt, default=False
     )
     if create_user_confirmed:
-        operations.append(("New User", lambda: create_user()))
+        user_operation: tuple[str, Callable[[], bool]] = (
+            "New User", lambda: create_user()
+        )
+        operations.append(user_operation)
 
     results: dict[str, bool] = {}
 
@@ -177,15 +183,18 @@ def main() -> None:
             "Starting operations...", total=len(operations)
         )
 
-        for name, operation in operations:
-            progress.update(task, description=f"🔄 Processing {name}...")
+        for operation_name, operation_func in operations:
+            progress_description: str = f"🔄 Processing {operation_name}..."
+            progress.update(task, description=progress_description)
 
             try:
-                success: bool = operation()
-                results[name] = success
+                success: bool = operation_func()
+                results[operation_name] = success
             except Exception as e:
-                console.print(f"Error in {name}: {e}")
-                results[name] = False
+                error_msg: str = str(e)
+                error_text: str = f"Error in {operation_name}: {error_msg}"
+                console.print(error_text)
+                results[operation_name] = False
 
             progress.update(task, advance=1)
 
@@ -197,19 +206,25 @@ def main() -> None:
     total_count: int = len(results)
 
     if success_count == total_count:
-        final_panel: Panel = Panel(
+        success_message: str = (
             "🎉 All operations completed successfully!\n\n"
             "💡 [bold yellow]Reboot now[/bold yellow] so MAC, hostname "
-            "and new machine-id take full effect.",
+            "and new machine-id take full effect."
+        )
+        final_panel: Panel = Panel(
+            success_message,
             title="✅ Success",
             style="bright_green",
         )
     else:
-        final_panel = Panel(
+        partial_message: str = (
             f"⚠️  {success_count}/{total_count} operations completed "
             "successfully.\n\n"
             "Please check the results above and retry failed operations "
-            "if needed.",
+            "if needed."
+        )
+        final_panel = Panel(
+            partial_message,
             title="⚠️  Partial Success",
             style="yellow",
         )

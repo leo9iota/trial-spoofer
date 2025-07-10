@@ -24,18 +24,21 @@ def clean_vscode_caches(home: Path) -> bool:
         ]
 
         cleaned_any: bool = False
-        for g in purge_globs:
-            cache_paths: Iterator[Path] = home.glob(g)
-            for p in cache_paths:
-                if p.exists():
-                    log(f"Removing {p}")
-                    shutil.rmtree(p, ignore_errors=True)
+        for glob_pattern in purge_globs:
+            cache_paths: Iterator[Path] = home.glob(glob_pattern)
+            for cache_path in cache_paths:
+                if cache_path.exists():
+                    log_message: str = f"Removing {cache_path}"
+                    log(log_message)
+                    shutil.rmtree(cache_path, ignore_errors=True)
                     cleaned_any = True
 
         if not cleaned_any:
-            log("No VS Code caches found to clean")
+            no_cache_message: str = "No VS Code caches found to clean"
+            log(no_cache_message)
 
         return True
     except Exception as e:
-        log(f"Failed to clean VS Code caches: {e}")
+        error_msg: str = str(e)
+        log(f"Failed to clean VS Code caches: {error_msg}")
         return False
