@@ -1,36 +1,37 @@
-# justfile for vscode-spoofer Python project
-# Run `just` to see available commands
-
-# Default recipe - show available commands
+# List available commands
 default:
     @just --list
+
+# Show project info
+info:
+    @echo "Project: vscode-spoofer"
+    @echo "Python version: $(uv run python --version)"
+    @echo "UV version: $(uv --version)"
+    @echo "Dependencies:"
+    @uv tree
 
 # Setup development environment
 setup:
     @echo "Setting up development environment..."
     uv sync --dev
 
+# Run spoofer
+run:
+    sudo uv run python src/main.py
+
 # Install dependencies
 install:
     uv sync
 
-# Add a new dependency
+# Add new dependency
 add package:
     uv add {{package}}
 
-# Add a development dependency
+# Add new development dependency
 add-dev package:
     uv add --dev {{package}}
 
-# Run the main application
-run *args:
-    uv run python main.py {{args}}
-
-# Run the new spoofer implementation
-spoof *args:
-    uv run python src/main.py {{args}}
-
-# Run demos
+# Run specific demo
 demo demo:
     uv run python src/demos/{{demo}}
 
@@ -42,7 +43,7 @@ test:
 test-cov:
     uv run pytest --cov=src --cov-report=html --cov-report=term
 
-# Format code with black
+# Format code
 format:
     uv run black .
 
@@ -50,7 +51,7 @@ format:
 format-check:
     uv run black --check .
 
-# Lint code with ruff
+# Lint code
 lint:
     uv run ruff check .
 
@@ -58,15 +59,17 @@ lint:
 lint-fix:
     uv run ruff check --fix .
 
-# Type check with mypy
+# Check types
 typecheck:
     uv run mypy .
 
 # Run all quality checks
-check: format-check lint typecheck
+check:
+    format-check lint typecheck
 
 # Fix all auto-fixable issues
-fix: format lint-fix
+fix:
+    format lint-fix
 
 # Clean up build artifacts and cache
 clean:
@@ -87,14 +90,6 @@ build:
 dev-install:
     uv pip install -e .
 
-# Show project info
-info:
-    @echo "Project: vscode-spoofer"
-    @echo "Python version: $(uv run python --version)"
-    @echo "UV version: $(uv --version)"
-    @echo "Dependencies:"
-    @uv tree
-
 # Update all dependencies
 update:
     uv lock --upgrade
@@ -103,25 +98,21 @@ update:
 venv:
     uv venv
 
-# Activate virtual environment (shows command to run)
-activate:
-    @echo "Run: source .venv/bin/activate"
+# Activate virtual environment
+activate-venv:
+    source .venv/bin/activate
 
 # Run security audit
 audit:
     uv run pip-audit
 
-# Generate requirements.txt for compatibility
+# Generate requirements file for compatibility
 requirements:
     uv export --format requirements-txt --output-file requirements.txt
 
 # Run interactive Python shell
 shell:
     uv run python
-
-# Run IPython shell (if installed)
-ipython:
-    uv run ipython
 
 # Install pre-commit hooks
 pre-commit-install:
