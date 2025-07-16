@@ -30,8 +30,9 @@ run *args:
 spoof *args:
     uv run python src/main.py {{args}}
 
-demo:
-    uv run python src/demo.py
+# Run demos
+demo demo:
+    uv run python src/demos/{{demo}}
 
 # Run tests
 test:
