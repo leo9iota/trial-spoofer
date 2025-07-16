@@ -113,7 +113,7 @@ class TUI:
         )
 
     def create_warning_panel(
-        self, message: str, title: str = "⚠️  Partial Success"
+        self, message: str, title: str = "⚠️ Partial Success"
     ) -> Panel:
         """Create a warning panel."""
         return Panel(
