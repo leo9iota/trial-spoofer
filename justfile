@@ -30,9 +30,8 @@ run *args:
 spoof *args:
     uv run python src/main.py {{args}}
 
-# Run the original spoofer script
-spoof-original *args:
-    uv run python linux_vscode_spoofer.py {{args}}
+demo:
+    uv run python src/demo.py
 
 # Run tests
 test:
