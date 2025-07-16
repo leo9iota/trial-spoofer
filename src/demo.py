@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import random
 import time
-from pathlib import Path
 
 from rich.align import Align
 from rich.console import Console
