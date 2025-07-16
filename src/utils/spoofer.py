@@ -20,7 +20,7 @@ def spoof_mac_addr() -> bool:
         )
         if iface:
             new_mac: str = rand_mac()
-            log(f"Setting {iface} MAC → {new_mac}")
+            log(f"Setting {iface} MAC {new_mac}")
             run_cmd(f"ip link set dev {iface} down")
             run_cmd(f"ip link set dev {iface} address {new_mac}")
             run_cmd(f"ip link set dev {iface} up")
@@ -37,7 +37,7 @@ def spoof_mac_addr() -> bool:
 def spoof_machine_id() -> bool:
     """Regenerate /etc/machine-id."""
     try:
-        log("Regenerating machine‑id …")
+        log("Regenerating machine-id …")
         run_cmd("rm -f /etc/machine-id")
         run_cmd("systemd-machine-id-setup")
         return True
