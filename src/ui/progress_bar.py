@@ -1,32 +1,51 @@
+from rich.panel import Panel
 from rich.progress import (
     BarColumn,
-    MofNCompleteColumn,
     Progress,
+    ProgressColumn,
     SpinnerColumn,
     TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
-    TimeRemainingColumn,
 )
+from rich.text import Text
 
 
-def progress_bar(self):
+class StatusSpinnerColumn(ProgressColumn):
+    """Custom column that shows spinner or status symbol"""
+
+    def __init__(self):
+        super().__init__()
+        self.spinner = SpinnerColumn()
+
+    def render(self, task):
+        status = task.fields.get("status", "")
+        if status == "✓":
+            return Text("✓", style="bold green")
+        elif status == "✗":
+            return Text("✗", style="bold red")
+        elif status:
+            return Text(status, style="bold")
+        else:
+            # Show spinner for active tasks
+            return self.spinner.render(task)
+
+
+def progress_bar():
     """Rich TUI progress bar"""
     progress = Progress(
-        SpinnerColumn(),
+        StatusSpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
         TaskProgressColumn(),
-        MofNCompleteColumn(),
         TimeElapsedColumn(),
-        TimeRemainingColumn(),
     )
 
-    task1 = progress.add_task("Downloading...", total=100)
-    task2 = progress.add_task("Processing...", total=100)
-    task3 = progress.add_task("Uploading...", total=100)
+    task1 = progress.add_task("Downloading", total=100, status="✓")
+    task2 = progress.add_task("Processing", total=100, status="✗")
+    task3 = progress.add_task("Uploading", total=100, status="")
 
-    progress.update(task1, completed=75)
+    progress.update(task1, completed=100)
     progress.update(task2, completed=45)
     progress.update(task3, completed=90)
 
