@@ -47,7 +47,7 @@ def spoof_machine_id() -> bool:
         return False
 
 
-def spoof_fs_uuid() -> bool:
+def spoof_filesystem_uuid() -> bool:
     """Randomize root-filesystem UUID."""
     try:
         root_dev: str | None = run("findmnt -no SOURCE /", capture=True)

@@ -23,7 +23,7 @@ from collections.abc import Callable
 from tui import create_tui
 from utils.cleaner import clean_vscode_caches
 from utils.helper import parse_args, root_check
-from utils.spoofer import spoof_fs_uuid, spoof_mac_addr, spoof_machine_id
+from utils.spoofer import spoof_filesystem_uuid, spoof_mac_addr, spoof_machine_id
 from utils.system import change_hostname, create_user, update_boot_config
 
 
@@ -70,7 +70,7 @@ def main() -> None:
     operations: list[tuple[str, Callable[[], bool]]] = [
         ("MAC Address", lambda: spoof_mac_addr()),
         ("Machine ID", lambda: spoof_machine_id()),
-        ("Filesystem UUID", lambda: spoof_fs_uuid() if not skip_uuid else True),
+        ("Filesystem UUID", lambda: spoof_filesystem_uuid() if not skip_uuid else True),
         ("Hostname", lambda: change_hostname()),
         ("VS Code Caches", lambda: clean_vscode_caches(home)),
         ("Boot Config", lambda: update_boot_config()),
