@@ -16,22 +16,21 @@ Features:
 
 from __future__ import annotations
 
-import argparse
 import sys
 from collections.abc import Callable
 
 from tui import create_tui
-from utils.cleaner import clean_vscode_caches
-from utils.helper import parse_args, root_check
+
+from utils.helpers import clean_vscode_caches, root_check
 from utils.spoofer import spoof_filesystem_uuid, spoof_mac_addr, spoof_machine_id
 from utils.system import change_hostname, create_user, update_boot_config
 
 
 def main() -> None:
     """Main application entry point."""
-    args: argparse.Namespace = parse_args()
-    assume_yes: bool = args.non_interactive
-    skip_uuid: bool = args.no_uuid
+    # Set default behavior (no command line arguments)
+    assume_yes: bool = False  # Always ask for confirmation
+    skip_uuid: bool = False   # Include filesystem UUID spoofing
 
     # Initialize TUI
     tui = create_tui()

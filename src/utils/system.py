@@ -9,7 +9,7 @@ import random
 import subprocess as sp
 from pathlib import Path
 
-from .helper import log, run_cmd
+from .helpers import log, run_cmd
 
 
 def change_hostname() -> bool:

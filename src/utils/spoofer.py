@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from .helper import log, rand_mac, run_cmd
+from .helpers import log, rand_mac, run_cmd
 
 
 def spoof_mac_addr() -> bool:
