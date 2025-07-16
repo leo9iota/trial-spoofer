@@ -8,22 +8,22 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from .helper import log, rand_mac, run
+from .helper import log, rand_mac, run_cmd
 
 
 def spoof_mac_addr() -> bool:
     """Spoof MAC address of the first active, non-loopback NIC."""
     try:
-        iface: str | None = run(
+        iface: str | None = run_cmd(
             "ip -o link show | awk -F': ' '!/lo/ {print $2; exit}'",
             capture=True,
         )
         if iface:
             new_mac: str = rand_mac()
             log(f"Setting {iface} MAC → {new_mac}")
-            run(f"ip link set dev {iface} down")
-            run(f"ip link set dev {iface} address {new_mac}")
-            run(f"ip link set dev {iface} up")
+            run_cmd(f"ip link set dev {iface} down")
+            run_cmd(f"ip link set dev {iface} address {new_mac}")
+            run_cmd(f"ip link set dev {iface} up")
             return True
         else:
             log("No active non-loopback NIC found - skipping MAC spoof.")
@@ -38,8 +38,8 @@ def spoof_machine_id() -> bool:
     """Regenerate /etc/machine-id."""
     try:
         log("Regenerating machine‑id …")
-        run("rm -f /etc/machine-id")
-        run("systemd-machine-id-setup")
+        run_cmd("rm -f /etc/machine-id")
+        run_cmd("systemd-machine-id-setup")
         return True
     except Exception as e:
         error_msg: str = str(e)
@@ -50,8 +50,8 @@ def spoof_machine_id() -> bool:
 def spoof_filesystem_uuid() -> bool:
     """Randomize root-filesystem UUID."""
     try:
-        root_dev: str | None = run("findmnt -no SOURCE /", capture=True)
-        fstype: str | None = run("findmnt -no FSTYPE /", capture=True)
+        root_dev: str | None = run_cmd("findmnt -no SOURCE /", capture=True)
+        fstype: str | None = run_cmd("findmnt -no FSTYPE /", capture=True)
 
         if not root_dev:
             log("Could not determine root device")
@@ -59,16 +59,16 @@ def spoof_filesystem_uuid() -> bool:
 
         if fstype == "ext4":
             log("tune2fs -U random …")
-            run(f"tune2fs -U random {root_dev}")
+            run_cmd(f"tune2fs -U random {root_dev}")
         elif fstype == "btrfs":
             log("btrfstune -u …")
-            run(f"btrfstune -u {root_dev}")
+            run_cmd(f"btrfstune -u {root_dev}")
         else:
             log(f"Filesystem {fstype} not supported - skipping UUID change.")
             return False
 
         # Update fstab
-        new_uuid: str | None = run(
+        new_uuid: str | None = run_cmd(
             f"blkid -s UUID -o value {root_dev}", capture=True
         )
         if new_uuid:

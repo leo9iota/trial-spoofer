@@ -9,7 +9,7 @@ import random
 import subprocess as sp
 from pathlib import Path
 
-from .helper import log, run
+from .helper import log, run_cmd
 
 
 def change_hostname() -> bool:
@@ -19,7 +19,7 @@ def change_hostname() -> bool:
         new_host: str = f"sandbox-{random_number}"
         hostname_cmd: str = f"hostnamectl set-hostname {new_host}"
         log(hostname_cmd)
-        run(hostname_cmd)
+        run_cmd(hostname_cmd)
         return True
     except Exception as e:
         error_msg: str = str(e)
@@ -34,13 +34,13 @@ def update_boot_config() -> bool:
         grub_cfg: Path = Path("/boot/grub/grub.cfg")
         grub_config_cmd: str = "grub-mkconfig -o /boot/grub/grub.cfg"
         if grub_cfg.exists():
-            run(grub_config_cmd, check=False)
+            run_cmd(grub_config_cmd, check=False)
         # systemd-boot
         else:
             systemd_boot_conf: Path = Path("/boot/loader/loader.conf")
             bootctl_cmd: str = "bootctl update"
             if systemd_boot_conf.exists():
-                run(bootctl_cmd, check=False)
+                run_cmd(bootctl_cmd, check=False)
 
         # Regenerate initramfs if crypttab was touched
         crypttab_path: Path = Path("/etc/crypttab")
@@ -48,10 +48,10 @@ def update_boot_config() -> bool:
             arch_release: Path = Path("/etc/arch-release")
             if arch_release.exists():
                 arch_initramfs_cmd: str = "mkinitcpio -P"
-                run(arch_initramfs_cmd, check=False)
+                run_cmd(arch_initramfs_cmd, check=False)
             else:  # Debian/Ubuntu
                 debian_initramfs_cmd: str = "update-initramfs -u -k all"
-                run(debian_initramfs_cmd, check=False)
+                run_cmd(debian_initramfs_cmd, check=False)
 
         return True
     except Exception as e:
@@ -72,8 +72,8 @@ def create_user() -> bool:
             log(f"Adding user {user} (password: {pw})")
             useradd_cmd: str = f"useradd -m {user}"
             passwd_cmd: str = f"echo '{user}:{pw}' | chpasswd"
-            run(useradd_cmd)
-            run(passwd_cmd)
+            run_cmd(useradd_cmd)
+            run_cmd(passwd_cmd)
         else:
             log("User already exists - skipping.")
         return True

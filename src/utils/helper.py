@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 
-def run(cmd: str, capture: bool = False, check: bool = True) -> str | None:
+def run_cmd(cmd: str, capture: bool = False, check: bool = True) -> str | None:
     """Thin wrapper around subprocess.run("cmd", shell=True …)."""
     res: sp.CompletedProcess[str] = sp.run(
         cmd,
@@ -31,7 +31,7 @@ def run(cmd: str, capture: bool = False, check: bool = True) -> str | None:
     return res.stdout.strip() if capture and res.stdout else None
 
 
-def ask(msg: str, default_yes: bool, assume_yes: bool) -> bool:
+def prompt_user(msg: str, default_yes: bool, assume_yes: bool) -> bool:
     """Ask user for confirmation with yes/no prompt."""
     if assume_yes:
         return True
