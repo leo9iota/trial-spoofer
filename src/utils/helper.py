@@ -13,7 +13,6 @@ import sys
 from pathlib import Path
 
 
-
 def run(cmd: str, capture: bool = False, check: bool = True) -> str | None:
     """Thin wrapper around subprocess.run("cmd", shell=True …)."""
     res: sp.CompletedProcess[str] = sp.run(
@@ -25,7 +24,9 @@ def run(cmd: str, capture: bool = False, check: bool = True) -> str | None:
     )
     if check and res.returncode != 0:
         stdout_output: str = res.stdout or ""
-        error_message: str = f"Command failed ({res.returncode}): {cmd}\n{stdout_output}"
+        error_message: str = (
+            f"Command failed ({res.returncode}): {cmd}\n{stdout_output}"
+        )
         raise RuntimeError(error_message)
     return res.stdout.strip() if capture and res.stdout else None
 
