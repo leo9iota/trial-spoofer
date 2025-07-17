@@ -150,4 +150,5 @@ exclude_lines = [
 [dependency-groups]
 dev = [
     "mypy>=1.16.1",
+    "pytest>=8.4.1",
 ]

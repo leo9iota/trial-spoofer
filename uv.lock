@@ -894,6 +894,7 @@ dev = [
 [package.dev-dependencies]
 dev = [
     { name = "mypy" },
+    { name = "pytest" },
 ]
 
 [package.metadata]
@@ -911,4 +912,7 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "mypy", specifier = ">=1.16.1" }]
+dev = [
+    { name = "mypy", specifier = ">=1.16.1" },
+    { name = "pytest", specifier = ">=8.4.1" },
+]
