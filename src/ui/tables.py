@@ -20,43 +20,50 @@ class FeatureTable:
             {
                 "name": "MAC Address",
                 "description": "Spoof network interface MAC address",
-                "risk_level": "🟢 Low",
-                "icon": "🌐",
+                "risk_level": "[green]Low[/green]",
+                "icon": "",
                 "status": "Ready",
             },
             {
                 "name": "Machine ID",
                 "description": "Regenerate system machine-id",
-                "risk_level": "🟢 Low",
-                "icon": "🔧",
+                "risk_level": "[green]Low[/green]",
+                "icon": "",
                 "status": "Ready",
             },
             {
                 "name": "Filesystem UUID",
                 "description": "Randomize root filesystem UUID",
-                "risk_level": "🟡 Medium",
-                "icon": "💾",
+                "risk_level": "[yellow]Medium[/yellow]",
+                "icon": "",
                 "status": "Ready",
             },
             {
                 "name": "Hostname",
                 "description": "Set random hostname",
-                "risk_level": "🟢 Low",
-                "icon": "🏷️",
+                "risk_level": "[green]Low[/green]",
+                "icon": "",
                 "status": "Ready",
             },
             {
                 "name": "VS Code Caches",
                 "description": "Purge editor caches and extensions",
-                "risk_level": "🟢 Low",
-                "icon": "🗑️",
+                "risk_level": "[green]Low[/green]",
+                "icon": "",
                 "status": "Ready",
             },
             {
                 "name": "New User",
                 "description": "Create sandbox user account",
-                "risk_level": "🟢 Low",
-                "icon": "👤",
+                "risk_level": "[green]Low[/green]",
+                "icon": "",
+                "status": "Ready",
+            },
+            {
+                "name": "System Info",
+                "description": "Display comprehensive system information",
+                "risk_level": "[green]Low[/green]",
+                "icon": "",
                 "status": "Ready",
             },
         ]
@@ -68,41 +75,29 @@ class FeatureTable:
     def create_info_table(self) -> Table:
         """Create the main features information table."""
         table = Table(
-            title="🛡️ VSCode Spoofer Features",
+            title="VSCode Spoofer Features",
             show_header=True,
             header_style="bold magenta",
             border_style="blue",
         )
 
         table.add_column("Selected", justify="center", width=8, style="bold")
-        table.add_column("Feature", style="cyan", width=18)
-        table.add_column("Description", style="white", width=35)
-        table.add_column("Risk", justify="center", width=12)
-        table.add_column("Status", justify="center", width=12)
+        table.add_column("Feature", style="cyan", justify="left")
+        table.add_column("Description", style="white", justify="left")
+        table.add_column("Risk", style="white", justify="left")
 
         for feature in self.features:
             # Selection indicator
-            selected_icon = "✅" if self.selections[feature["name"]] else "⬜"
-
-            # Status styling
-            status = feature["status"]
-            if status == "Ready":
-                status_styled = f"[green]{status}[/green]"
-            elif status == "Running":
-                status_styled = f"[yellow]{status}[/yellow]"
-            elif status == "Complete":
-                status_styled = f"[bold green]{status}[/bold green]"
-            elif status == "Failed":
-                status_styled = f"[red]{status}[/red]"
+            if self.selections[feature["name"]]:
+                selected_icon = "[[bold green]✓[/bold green]]"
             else:
-                status_styled = f"[dim]{status}[/dim]"
+                selected_icon = "[[bold red]✗[/bold red]]"
 
             table.add_row(
                 selected_icon,
-                f"{feature['icon']} {feature['name']}",
+                feature['name'],
                 feature["description"],
                 feature["risk_level"],
-                status_styled,
             )
 
         return table
@@ -127,9 +122,9 @@ class FeatureTable:
             border_style="green",
         )
 
-        table.add_column("Feature", style="cyan", width=20)
-        table.add_column("Description", style="white", width=35)
-        table.add_column("Risk", justify="center", width=12)
+        table.add_column("Feature", style="cyan", justify="left")
+        table.add_column("Description", style="white", justify="left")
+        table.add_column("Risk", style="white", justify="left")
 
         for feature_name in selected_features:
             feature = self.get_feature_by_name(feature_name)
@@ -206,7 +201,7 @@ class FeatureTable:
 def identifiers_table() -> Table:
     """Create a table showing current system identifiers."""
     table = Table(
-        title="🔍 Current System Identifiers",
+        title="Current System Identifiers",
         show_header=True,
         header_style="bold cyan",
         border_style="cyan",
@@ -214,16 +209,12 @@ def identifiers_table() -> Table:
 
     table.add_column("Identifier", style="yellow", width=20)
     table.add_column("Current Value", style="white", width=40)
-    table.add_column("Status", justify="center", width=12)
 
     # Get current system identifiers
     identifiers = _get_current_identifiers()
 
     for identifier, value in identifiers.items():
-        status = (
-            "[green]Active[/green]" if value != "Not found" else "[red]Missing[/red]"
-        )
-        table.add_row(identifier, value, status)
+        table.add_row(identifier, value)
 
     return table
 
@@ -231,7 +222,7 @@ def identifiers_table() -> Table:
 def modified_identifiers_table(modifications: dict[str, str]) -> Table:
     """Create a table showing modified system identifiers."""
     table = Table(
-        title="✨ Modified System Identifiers",
+        title="Modified System Identifiers",
         show_header=True,
         header_style="bold green",
         border_style="green",
@@ -251,9 +242,8 @@ def modified_identifiers_table(modifications: dict[str, str]) -> Table:
         old_display = old_value[:15] + "..." if len(old_value) > 18 else old_value
         new_display = new_value[:15] + "..." if len(new_value) > 18 else new_value
 
-        table.add_row(
-            identifier, old_display, new_display, "[bold green]Modified[/bold green]"
-        )
+        status_text = "[bold green][~] Modified[/bold green]"
+        table.add_row(identifier, old_display, new_display, status_text)
 
     return table
 
