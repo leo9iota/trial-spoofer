@@ -68,134 +68,8 @@ class FeatureTable:
             },
         ]
 
-        # Initialize selections (all False by default)
-        for feature in self.features:
-            self.selections[feature["name"]] = False
-
-    def create_info_table(self) -> Table:
-        """Create the main features information table."""
-        table = Table(
-            title="VSCode Spoofer Features",
-            show_header=True,
-            header_style="bold magenta",
-            border_style="blue",
-        )
-
-        table.add_column("Selected", justify="center", width=8, style="bold")
-        table.add_column("Feature", style="cyan", justify="left")
-        table.add_column("Description", style="white", justify="left")
-        table.add_column("Risk", style="white", justify="left")
-
-        for feature in self.features:
-            # Selection indicator
-            if self.selections[feature["name"]]:
-                selected_icon = "[[bold green]✓[/bold green]]"
-            else:
-                selected_icon = "[[bold red]✗[/bold red]]"
-
-            table.add_row(
-                selected_icon,
-                feature['name'],
-                feature["description"],
-                feature["risk_level"],
-            )
-
-        return table
-
-    def create_selection_summary_table(self) -> Table:
-        """Create a summary table of selected features only."""
-        selected_features = self.get_selected_features()
-
-        if not selected_features:
-            # Create empty table with message
-            table = Table(
-                title="📋 Selected Features", show_header=False, border_style="yellow"
-            )
-            table.add_column("Message", justify="center")
-            table.add_row("[yellow]No features selected[/yellow]")
-            return table
-
-        table = Table(
-            title="📋 Selected Features",
-            show_header=True,
-            header_style="bold green",
-            border_style="green",
-        )
-
-        table.add_column("Feature", style="cyan", justify="left")
-        table.add_column("Description", style="white", justify="left")
-        table.add_column("Risk", style="white", justify="left")
-
-        for feature_name in selected_features:
-            feature = self.get_feature_by_name(feature_name)
-            if feature:
-                table.add_row(
-                    f"{feature['icon']} {feature['name']}",
-                    feature["description"],
-                    feature["risk_level"],
-                )
-
-        return table
-
-    def select_feature(self, feature_name: str) -> bool:
-        """Select a specific feature."""
-        if feature_name in self.selections:
-            self.selections[feature_name] = True
-            return True
-        return False
-
-    def deselect_feature(self, feature_name: str) -> bool:
-        """Deselect a specific feature."""
-        if feature_name in self.selections:
-            self.selections[feature_name] = False
-            return True
-        return False
-
-    def toggle_feature(self, feature_name: str) -> bool:
-        """Toggle selection state of a feature."""
-        if feature_name in self.selections:
-            self.selections[feature_name] = not self.selections[feature_name]
-            return True
-        return False
-
-    def select_all(self) -> None:
-        """Select all features."""
-        for feature_name in self.selections:
-            self.selections[feature_name] = True
-
-    def deselect_all(self) -> None:
-        """Deselect all features."""
-        for feature_name in self.selections:
-            self.selections[feature_name] = False
-
-    def get_selected_features(self) -> list[str]:
-        """Get list of selected feature names."""
-        return [name for name, selected in self.selections.items() if selected]
-
-    def get_feature_by_name(self, name: str) -> dict | None:
-        """Get feature definition by name."""
-        for feature in self.features:
-            if feature["name"] == name:
-                return feature
-        return None
-
-    def update_feature_status(self, feature_name: str, status: str) -> bool:
-        """Update the status of a specific feature."""
-        for feature in self.features:
-            if feature["name"] == feature_name:
-                feature["status"] = status
-                return True
-        return False
-
-    def get_selections_dict(self) -> dict[str, bool]:
-        """Get the complete selections dictionary."""
-        return self.selections.copy()
-
-    def set_selections(self, selections: dict[str, bool]) -> None:
-        """Set the selections from a dictionary."""
-        for feature_name, selected in selections.items():
-            if feature_name in self.selections:
-                self.selections[feature_name] = selected
+    def feature_info_table():
+        print("Feature info")
 
 
 def identifiers_table() -> Table:
@@ -248,67 +122,38 @@ def modified_identifiers_table(modifications: dict[str, str]) -> Table:
     return table
 
 
-def _get_current_identifiers() -> dict[str, str]:
-    """Get current system identifiers."""
-    identifiers = {}
+def comparison_table(before_data: dict[str, str], after_data: dict[str, str]) -> Table:
+    """Create a side-by-side comparison table of before and after values."""
+    table = Table(
+        title="Before/After Comparison",
+        show_header=True,
+        header_style="bold cyan",
+        border_style="cyan",
+    )
 
-    try:
-        # MAC Address (first active interface)
-        import subprocess
+    table.add_column("Identifier", style="yellow", width=20)
+    table.add_column("Before", style="dim white", width=25)
+    table.add_column("After", style="bold green", width=25)
+    table.add_column("Status", justify="center", width=12)
 
-        result = subprocess.run(
-            ["ip", "link", "show"], capture_output=True, text=True, timeout=5
+    for identifier in before_data.keys():
+        before_value = before_data.get(identifier, "Unknown")
+        after_value = after_data.get(identifier, "Unknown")
+
+        # Truncate long values for display
+        before_display = (
+            before_value[:22] + "..." if len(before_value) > 25 else before_value
         )
-        if result.returncode == 0:
-            lines = result.stdout.split("\n")
-            for line in lines:
-                if "link/ether" in line and "state UP" in lines[lines.index(line) - 1]:
-                    mac = line.split("link/ether")[1].split()[0]
-                    identifiers["MAC Address"] = mac
-                    break
-            if "MAC Address" not in identifiers:
-                identifiers["MAC Address"] = "Not found"
-        else:
-            identifiers["MAC Address"] = "Not found"
-    except Exception:
-        identifiers["MAC Address"] = "Not found"
-
-    try:
-        # Machine ID
-        with open("/etc/machine-id") as f:
-            identifiers["Machine ID"] = f.read().strip()
-    except Exception:
-        identifiers["Machine ID"] = "Not found"
-
-    try:
-        # Filesystem UUID (root partition)
-        result = subprocess.run(
-            ["findmnt", "-n", "-o", "UUID", "/"],
-            capture_output=True,
-            text=True,
-            timeout=5,
+        after_display = (
+            after_value[:22] + "..." if len(after_value) > 25 else after_value
         )
-        if result.returncode == 0:
-            identifiers["Filesystem UUID"] = result.stdout.strip()
+
+        # Determine status
+        if before_value != after_value:
+            status_text = "[bold green]✓[/bold green]"
         else:
-            identifiers["Filesystem UUID"] = "Not found"
-    except Exception:
-        identifiers["Filesystem UUID"] = "Not found"
+            status_text = "[dim]✗[/dim]"
 
-    try:
-        # Hostname
-        with open("/etc/hostname") as f:
-            identifiers["Hostname"] = f.read().strip()
-    except Exception:
-        try:
-            result = subprocess.run(
-                ["hostname"], capture_output=True, text=True, timeout=5
-            )
-            if result.returncode == 0:
-                identifiers["Hostname"] = result.stdout.strip()
-            else:
-                identifiers["Hostname"] = "Not found"
-        except Exception:
-            identifiers["Hostname"] = "Not found"
+        table.add_row(identifier, before_display, after_display, status_text)
 
-    return identifiers
+    return table
