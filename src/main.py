@@ -197,7 +197,7 @@ class VSCodeSpoofer:
     def run(self) -> None:
         """Main application loop."""
         try:
-            print_banner(center=True)
+            print_banner()
 
             # Check root privileges
             try:

@@ -61,7 +61,7 @@ banner_5 = """
 """
 
 
-def print_banner(center: bool = False) -> None:
+def print_banner() -> None:
     console = Console()
 
     console.print(banner_1, style="bold red", justify="center")
