@@ -6,9 +6,9 @@ User Input Module - Handles user interaction and feature selection
 from __future__ import annotations
 
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
-from rich.table import Table
 from rich.panel import Panel
+from rich.prompt import Confirm, Prompt
+from rich.table import Table
 from rich.text import Text
 
 
@@ -29,75 +29,83 @@ class UserInput:
         Returns:
             List of selected feature names
         """
-        self.console.print("[bold cyan]Feature Selection[/bold cyan]")
-        self.console.print("Select features to execute (comma-separated numbers or 'all'):")
-        self.console.print()
+        self.console.print("Select features (comma-separated names or 'all'):")
 
-        # Display numbered feature list
+        # Display feature list without numbers
         selection_table = Table(show_header=True, header_style="bold magenta")
-        selection_table.add_column("No.", justify="center", width=4)
-        selection_table.add_column("Feature", style="cyan", width=18)
+        selection_table.add_column("Feature", style="cyan", width=20)
         selection_table.add_column("Description", style="white", width=35)
         selection_table.add_column("Risk", justify="center", width=12)
 
-        for i, feature in enumerate(features, 1):
+        for feature in features:
             selection_table.add_row(
-                str(i),
-                f"{feature['icon']} {feature['name']}",
-                feature['description'],
-                feature['risk_level']
+                feature["name"],
+                feature["description"],
+                feature["risk_level"],
             )
 
         self.console.print(selection_table)
-        self.console.print()
 
         # Get user selection
         while True:
             try:
                 selection = Prompt.ask(
-                    "[bold]Enter your selection",
-                    default="all",
-                    show_default=True
-                ).strip().lower()
+                    "[bold]Enter your selection", default="all", show_default=True
+                ).strip()
 
-                if selection == "all":
-                    return [feature['name'] for feature in features]
+                if selection.lower() == "all":
+                    return [feature["name"] for feature in features]
 
-                if selection == "none" or selection == "":
+                if selection.lower() == "none" or selection == "":
                     return []
 
-                # Parse comma-separated numbers
-                selected_indices = []
-                for item in selection.split(','):
-                    item = item.strip()
-                    if item.isdigit():
-                        index = int(item)
-                        if 1 <= index <= len(features):
-                            selected_indices.append(index - 1)
-                        else:
-                            raise ValueError(f"Invalid selection: {index}")
-                    else:
-                        raise ValueError(f"Invalid input: {item}")
+                # Parse comma-separated feature names
+                selected_names = []
+                feature_names = [f["name"] for f in features]
 
-                if not selected_indices:
+                for item in selection.split(","):
+                    item = item.strip()
+                    # Try exact match first
+                    if item in feature_names:
+                        selected_names.append(item)
+                    else:
+                        # Try case-insensitive match
+                        found = False
+                        for fname in feature_names:
+                            if fname.lower() == item.lower():
+                                selected_names.append(fname)
+                                found = True
+                                break
+                        if not found:
+                            raise ValueError(f"Unknown feature: {item}")
+
+                if not selected_names:
                     self.console.print("[yellow]No valid selections made.[/yellow]")
                     continue
 
-                # Remove duplicates and sort
-                selected_indices = sorted(set(selected_indices))
-                selected_features = [features[i]['name'] for i in selected_indices]
+                # Remove duplicates while preserving order
+                seen = set()
+                unique_selected = []
+                for name in selected_names:
+                    if name not in seen:
+                        seen.add(name)
+                        unique_selected.append(name)
 
                 # Show selected features
-                self.console.print("\n[green]Selected features:[/green]")
-                for feature_name in selected_features:
-                    feature = next(f for f in features if f['name'] == feature_name)
-                    self.console.print(f"  • {feature['icon']} {feature_name}")
+                self.console.print("[green][+] Selected:[/green]")
+                for feature_name in unique_selected:
+                    self.console.print(f"  [>] {feature_name}")
 
-                return selected_features
+                return unique_selected
 
             except ValueError as e:
                 self.console.print(f"[red]Error: {e}[/red]")
-                self.console.print("[yellow]Please enter comma-separated numbers (e.g., '1,3,5') or 'all'[/yellow]")
+                self.console.print(
+                    "[yellow]Please enter comma-separated feature names, "
+                    "'all', or 'none'[/yellow]"
+                )
+                feature_list = ", ".join([f["name"] for f in features])
+                self.console.print(f"[dim]Available features: {feature_list}[/dim]")
                 continue
             except KeyboardInterrupt:
                 self.console.print("\n[yellow]Selection cancelled.[/yellow]")
@@ -118,29 +126,34 @@ class UserInput:
 
         # Create confirmation panel
         confirmation_text = Text()
-        confirmation_text.append("You are about to execute the following operations:\n\n", style="bold")
+        confirmation_text.append(
+            "Ready to execute the operations shown above.\n\n", style="bold"
+        )
 
+        confirmation_text.append("[>] Selected operations:\n", style="bold cyan")
         for feature in selected_features:
-            confirmation_text.append(f"  • {feature}\n", style="cyan")
+            confirmation_text.append(f"  [>] {feature}\n", style="white")
 
-        confirmation_text.append("\n⚠️  ", style="bold yellow")
-        confirmation_text.append("These operations will modify your system and may require a reboot.", style="yellow")
-        confirmation_text.append("\n⚠️  ", style="bold yellow")
-        confirmation_text.append("Make sure you have backups of important data.", style="yellow")
+        confirmation_text.append("\n[!] ", style="bold yellow")
+        confirmation_text.append(
+            "These operations will modify your system and may require a reboot.",
+            style="yellow",
+        )
+        confirmation_text.append("\n[!] ", style="bold yellow")
+        confirmation_text.append(
+            "Make sure you have backups of important data.", style="yellow"
+        )
 
         panel = Panel(
             confirmation_text,
-            title="[bold red]⚠️  Confirmation Required[/bold red]",
+            title="[bold red][!] Final Confirmation[/bold red]",
             border_style="red",
-            padding=(1, 2)
+            padding=(1, 2),
         )
 
         self.console.print(panel)
 
-        return Confirm.ask(
-            "\n[bold]Do you want to proceed?",
-            default=False
-        )
+        return Confirm.ask("\n[bold]Proceed with execution?", default=False)
 
     def get_user_confirmation(self, message: str, default: bool = False) -> bool:
         """
@@ -164,9 +177,9 @@ class UserInput:
         """
         warning_panel = Panel(
             Text(message, style="bold yellow"),
-            title="[bold yellow]⚠️  Warning[/bold yellow]",
+            title="[bold yellow]Warning[/bold yellow]",
             border_style="yellow",
-            padding=(1, 2)
+            padding=(1, 2),
         )
         self.console.print(warning_panel)
 
@@ -179,9 +192,9 @@ class UserInput:
         """
         error_panel = Panel(
             Text(message, style="bold red"),
-            title="[bold red]❌ Error[/bold red]",
+            title="[bold red]✗ Error[/bold red]",
             border_style="red",
-            padding=(1, 2)
+            padding=(1, 2),
         )
         self.console.print(error_panel)
 
@@ -194,8 +207,8 @@ class UserInput:
         """
         success_panel = Panel(
             Text(message, style="bold green"),
-            title="[bold green]✅ Success[/bold green]",
+            title="[bold green]✓ Success[/bold green]",
             border_style="green",
-            padding=(1, 2)
+            padding=(1, 2),
         )
         self.console.print(success_panel)
