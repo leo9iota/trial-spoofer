@@ -117,14 +117,14 @@ def test_imports():
     """Test that all required modules can be imported."""
     try:
         import main
-        from ui.tables import FeatureTable, identifiers_table
         from ui.input import UserInput
         from ui.progress_bar import SpoofingProgress
-        from utils.helpers import root_check, clean_vscode_caches
+        from ui.tables import FeatureTable, identifiers_table
+        from utils.helpers import clean_vscode_caches, root_check
         from utils.spoofer import (
+            spoof_filesystem_uuid,
             spoof_mac_addr,
             spoof_machine_id,
-            spoof_filesystem_uuid,
         )
         from utils.system import change_hostname, create_user, update_boot_config
 
