@@ -43,7 +43,6 @@ def run_cmd(cmd: str, capture: bool = False, check: bool = True) -> str | None:
     return res.stdout.strip() if capture and res.stdout else None
 
 
-
 def rand_mac() -> str:
     """Generate a random MAC address."""
     mac_parts: list[str] = [f"{random.randint(0, 255):02x}" for _ in range(5)]
@@ -51,11 +50,8 @@ def rand_mac() -> str:
 
 
 def log(msg: str) -> None:
-    """Log a message with [+] prefix."""
-    print(f"[+] {msg}")
-
-
-
+    """Logs msgs"""
+    print(f"{msg}")
 
 
 def clean_vscode_caches(home: Path) -> bool:
