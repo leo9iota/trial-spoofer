@@ -59,8 +59,6 @@ class VSCodeSpoofer:
         """Wrapper for cache cleaning that uses the correct home path."""
         return clean_vscode_caches(self.home_path)
 
-
-
     def create_layout(self) -> Layout:
         """Create the main application layout."""
         layout = Layout()
@@ -108,10 +106,6 @@ class VSCodeSpoofer:
                     live.update(self.progress.create_progress_display())
 
         return results
-
-
-
-
 
     def display_results(self, results: dict[str, bool]) -> None:
         """Display the results of the spoofing operations."""
@@ -200,13 +194,10 @@ class VSCodeSpoofer:
                 return choice
             self.console.print("[red]Invalid choice. Please enter 1, 2, or 3.[/red]")
 
-
-
     def run(self) -> None:
         """Main application loop."""
         try:
-            # Print banner first
-            print_banner()
+            print_banner(center=True)
 
             # Check root privileges
             try:
@@ -222,11 +213,10 @@ class VSCodeSpoofer:
                 error_panel = Panel(
                     error_text,
                     title="[bold red]Permission Error[/bold red]",
-                    border_style="red"
+                    border_style="red",
                 )
                 self.console.print(error_panel)
                 sys.exit(1)
-
 
             # Main menu loop
             while True:
