@@ -396,6 +396,12 @@ class DemoVSCodeSpoofer:
                     self.console.print()
                     
                 elif choice == "3":
+                    # Show system information
+                    self.console.print()
+                    self.show_system_info()
+                    self.console.print()
+
+                elif choice == "4":
                     self.console.print("[yellow]Exiting demo...[/yellow]")
                     break
 
