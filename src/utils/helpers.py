@@ -5,7 +5,6 @@ Helper utilities for the VS Code Spoofer.
 
 from __future__ import annotations
 
-
 import os
 import random
 import shutil
@@ -62,6 +61,7 @@ def clean_vscode_caches(home: Path) -> bool:
             ".vscode*",
             ".config/cursor",
             ".cursor",
+            ".config/Code*",
             ".cache/augment*",
         ]
 

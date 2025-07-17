@@ -3,7 +3,6 @@
 Table UI Components - Rich tables for VSCode Spoofer features and system identifiers
 """
 
-from typing import Optional
 from rich.console import Console
 from rich.table import Table
 
@@ -23,43 +22,43 @@ class FeatureTable:
                 "description": "Spoof network interface MAC address",
                 "risk_level": "🟢 Low",
                 "icon": "🌐",
-                "status": "Ready"
+                "status": "Ready",
             },
             {
                 "name": "Machine ID",
                 "description": "Regenerate system machine-id",
                 "risk_level": "🟢 Low",
                 "icon": "🔧",
-                "status": "Ready"
+                "status": "Ready",
             },
             {
                 "name": "Filesystem UUID",
                 "description": "Randomize root filesystem UUID",
                 "risk_level": "🟡 Medium",
                 "icon": "💾",
-                "status": "Ready"
+                "status": "Ready",
             },
             {
                 "name": "Hostname",
                 "description": "Set random hostname",
                 "risk_level": "🟢 Low",
                 "icon": "🏷️",
-                "status": "Ready"
+                "status": "Ready",
             },
             {
                 "name": "VS Code Caches",
                 "description": "Purge editor caches and extensions",
                 "risk_level": "🟢 Low",
                 "icon": "🗑️",
-                "status": "Ready"
+                "status": "Ready",
             },
             {
                 "name": "New User",
                 "description": "Create sandbox user account",
                 "risk_level": "🟢 Low",
                 "icon": "👤",
-                "status": "Ready"
-            }
+                "status": "Ready",
+            },
         ]
 
         # Initialize selections (all False by default)
@@ -72,7 +71,7 @@ class FeatureTable:
             title="🛡️ VSCode Spoofer Features",
             show_header=True,
             header_style="bold magenta",
-            border_style="blue"
+            border_style="blue",
         )
 
         table.add_column("Selected", justify="center", width=8, style="bold")
@@ -103,7 +102,7 @@ class FeatureTable:
                 f"{feature['icon']} {feature['name']}",
                 feature["description"],
                 feature["risk_level"],
-                status_styled
+                status_styled,
             )
 
         return table
@@ -115,9 +114,7 @@ class FeatureTable:
         if not selected_features:
             # Create empty table with message
             table = Table(
-                title="📋 Selected Features",
-                show_header=False,
-                border_style="yellow"
+                title="📋 Selected Features", show_header=False, border_style="yellow"
             )
             table.add_column("Message", justify="center")
             table.add_row("[yellow]No features selected[/yellow]")
@@ -127,7 +124,7 @@ class FeatureTable:
             title="📋 Selected Features",
             show_header=True,
             header_style="bold green",
-            border_style="green"
+            border_style="green",
         )
 
         table.add_column("Feature", style="cyan", width=20)
@@ -140,7 +137,7 @@ class FeatureTable:
                 table.add_row(
                     f"{feature['icon']} {feature['name']}",
                     feature["description"],
-                    feature["risk_level"]
+                    feature["risk_level"],
                 )
 
         return table
@@ -180,7 +177,7 @@ class FeatureTable:
         """Get list of selected feature names."""
         return [name for name, selected in self.selections.items() if selected]
 
-    def get_feature_by_name(self, name: str) -> Optional[dict]:
+    def get_feature_by_name(self, name: str) -> dict | None:
         """Get feature definition by name."""
         for feature in self.features:
             if feature["name"] == name:
@@ -212,7 +209,7 @@ def identifiers_table() -> Table:
         title="🔍 Current System Identifiers",
         show_header=True,
         header_style="bold cyan",
-        border_style="cyan"
+        border_style="cyan",
     )
 
     table.add_column("Identifier", style="yellow", width=20)
@@ -223,7 +220,9 @@ def identifiers_table() -> Table:
     identifiers = _get_current_identifiers()
 
     for identifier, value in identifiers.items():
-        status = "[green]Active[/green]" if value != "Not found" else "[red]Missing[/red]"
+        status = (
+            "[green]Active[/green]" if value != "Not found" else "[red]Missing[/red]"
+        )
         table.add_row(identifier, value, status)
 
     return table
@@ -235,7 +234,7 @@ def modified_identifiers_table(modifications: dict[str, str]) -> Table:
         title="✨ Modified System Identifiers",
         show_header=True,
         header_style="bold green",
-        border_style="green"
+        border_style="green",
     )
 
     table.add_column("Identifier", style="yellow", width=20)
@@ -253,10 +252,7 @@ def modified_identifiers_table(modifications: dict[str, str]) -> Table:
         new_display = new_value[:15] + "..." if len(new_value) > 18 else new_value
 
         table.add_row(
-            identifier,
-            old_display,
-            new_display,
-            "[bold green]Modified[/bold green]"
+            identifier, old_display, new_display, "[bold green]Modified[/bold green]"
         )
 
     return table
@@ -269,17 +265,15 @@ def _get_current_identifiers() -> dict[str, str]:
     try:
         # MAC Address (first active interface)
         import subprocess
+
         result = subprocess.run(
-            ["ip", "link", "show"],
-            capture_output=True,
-            text=True,
-            timeout=5
+            ["ip", "link", "show"], capture_output=True, text=True, timeout=5
         )
         if result.returncode == 0:
-            lines = result.stdout.split('\n')
+            lines = result.stdout.split("\n")
             for line in lines:
-                if 'link/ether' in line and 'state UP' in lines[lines.index(line)-1]:
-                    mac = line.split('link/ether')[1].split()[0]
+                if "link/ether" in line and "state UP" in lines[lines.index(line) - 1]:
+                    mac = line.split("link/ether")[1].split()[0]
                     identifiers["MAC Address"] = mac
                     break
             if "MAC Address" not in identifiers:
@@ -291,7 +285,7 @@ def _get_current_identifiers() -> dict[str, str]:
 
     try:
         # Machine ID
-        with open("/etc/machine-id", "r") as f:
+        with open("/etc/machine-id") as f:
             identifiers["Machine ID"] = f.read().strip()
     except Exception:
         identifiers["Machine ID"] = "Not found"
@@ -302,7 +296,7 @@ def _get_current_identifiers() -> dict[str, str]:
             ["findmnt", "-n", "-o", "UUID", "/"],
             capture_output=True,
             text=True,
-            timeout=5
+            timeout=5,
         )
         if result.returncode == 0:
             identifiers["Filesystem UUID"] = result.stdout.strip()
@@ -313,15 +307,12 @@ def _get_current_identifiers() -> dict[str, str]:
 
     try:
         # Hostname
-        with open("/etc/hostname", "r") as f:
+        with open("/etc/hostname") as f:
             identifiers["Hostname"] = f.read().strip()
     except Exception:
         try:
             result = subprocess.run(
-                ["hostname"],
-                capture_output=True,
-                text=True,
-                timeout=5
+                ["hostname"], capture_output=True, text=True, timeout=5
             )
             if result.returncode == 0:
                 identifiers["Hostname"] = result.stdout.strip()
