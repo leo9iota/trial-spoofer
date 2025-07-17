@@ -12,11 +12,15 @@ from pathlib import Path
 from .helpers import log, run_cmd
 
 
-def change_hostname() -> bool:
-    """Set a new random hostname."""
+def change_hostname(custom_hostname: str | None = None) -> bool:
+    """Set a new hostname (custom or random)."""
     try:
-        random_number: int = random.randint(1000, 9999)
-        new_host: str = f"sandbox-{random_number}"
+        if custom_hostname:
+            new_host: str = custom_hostname
+        else:
+            random_number: int = random.randint(1000, 9999)
+            new_host = f"sandbox-{random_number}"
+
         hostname_cmd: str = f"hostnamectl set-hostname {new_host}"
         log(hostname_cmd)
         run_cmd(hostname_cmd)
@@ -60,10 +64,10 @@ def update_boot_config() -> bool:
         return False
 
 
-def create_user() -> bool:
-    """Create throw-away user 'vscode_sandbox'."""
+def create_user(custom_username: str | None = None) -> bool:
+    """Create throw-away user (custom name or 'vscode_sandbox')."""
     try:
-        user: str = "vscode_sandbox"
+        user: str = custom_username if custom_username else "vscode_sandbox"
         user_check_cmd: str = f"id -u {user}"
         user_check_result: int = sp.call(user_check_cmd, shell=True)
         if user_check_result != 0:
