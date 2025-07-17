@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-"""
-VS Code Spoofer main application entry point
-"""
 
 from __future__ import annotations
 
@@ -18,6 +15,7 @@ from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
+from rich.prompt import Confirm
 from rich.text import Text
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -25,17 +23,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ui.banner import print_banner
 from ui.input import UserInput
 from ui.progress import ProgressBar
-from ui.tables import FeatureTable, identifiers_table
+from ui.tables import FeatureTable, comparison_table, identifiers_table
 from utils.helpers import clean_vscode_caches, root_check
 from utils.spoofer import spoof_filesystem_uuid, spoof_mac_addr, spoof_machine_id
-from utils.system import change_hostname, create_user
 
 
 class VSCodeSpoofer:
-    """Main application class for VS Code Spoofer."""
-
     def __init__(self):
-        """Initialize the spoofer application."""
         self.console = Console()
         self.feature_table = FeatureTable()
         self.user_input = UserInput()
@@ -46,9 +40,9 @@ class VSCodeSpoofer:
             "MAC Address": spoof_mac_addr,
             "Machine ID": spoof_machine_id,
             "Filesystem UUID": spoof_filesystem_uuid,
-            "Hostname": change_hostname,
+            "Hostname": self._change_hostname_wrapper,
             "VS Code Caches": self._clean_caches_wrapper,
-            "New User": create_user,
+            "New User": self._create_user_wrapper,
         }
 
         # User info from root check
@@ -56,11 +50,24 @@ class VSCodeSpoofer:
         self.home_path = Path()
 
     def _clean_caches_wrapper(self) -> bool:
-        """Wrapper for cache cleaning that uses the correct home path."""
         return clean_vscode_caches(self.home_path)
 
+    def _change_hostname_wrapper(self) -> bool:
+        from utils.system import change_hostname
+
+        custom_hostname = self.user_input.get_custom_hostname()
+        return change_hostname(custom_hostname)
+
+    def _create_user_wrapper(self) -> bool:
+        from utils.system import create_user
+
+        custom_username = self.user_input.get_custom_username()
+        # Don't pass "vscode_sandbox" as custom since it's the default
+        if custom_username == "vscode_sandbox":
+            custom_username = None
+        return create_user(custom_username)
+
     def create_layout(self) -> Layout:
-        """Create the main application layout."""
         layout = Layout()
 
         layout.split_column(
@@ -76,7 +83,6 @@ class VSCodeSpoofer:
         return layout
 
     def run_selected_features(self, selected_features: list[str]) -> dict[str, bool]:
-        """Execute the selected spoofing features."""
         results = {}
 
         with Live(
@@ -108,7 +114,6 @@ class VSCodeSpoofer:
         return results
 
     def display_results(self, results: dict[str, bool]) -> None:
-        """Display the results of the spoofing operations."""
         success_count = sum(1 for success in results.values() if success)
         total_count = len(results)
 
@@ -182,10 +187,9 @@ class VSCodeSpoofer:
             return False
 
     def show_main_menu(self) -> str:
-        """Show main menu and get user choice."""
-        self.console.print("[bold cyan]Main Menu[/bold cyan]")
+        self.console.print("[bold cyan]Options[/bold cyan]")
         self.console.print("1. List system identifiers")
-        self.console.print("2. Apply spoofing features")
+        self.console.print("2. Spoof system identifiers")
         self.console.print("3. Exit")
 
         while True:
@@ -195,7 +199,6 @@ class VSCodeSpoofer:
             self.console.print("[red]Invalid choice. Please enter 1, 2, or 3.[/red]")
 
     def run(self) -> None:
-        """Main application loop."""
         try:
             print_banner()
 
@@ -232,11 +235,7 @@ class VSCodeSpoofer:
                     # Apply spoofing features
                     self.console.print()
 
-                    # Show available features and get user selection
-                    self.console.print(self.feature_table.create_info_table())
-                    self.console.print()
-
-                    # Get user input for feature selection
+                    # Step 1: Get user input for feature selection (no table display)
                     selected_features = self.user_input.get_feature_selection(
                         self.feature_table.features
                     )
@@ -250,27 +249,43 @@ class VSCodeSpoofer:
                         f for f in selected_features if "Filesystem UUID" in f
                     ]
                     if high_risk_features:
-                        self.user_input.display_warning(
-                            "You have selected high-risk operations that may affect "
-                            "system boot. Ensure you have a recovery method available."
+                        warning_msg = (
+                            "High-risk operations selected that may affect system boot. "
+                            "Ensure you have a recovery method available."
                         )
-                        if not self.user_input.get_user_confirmation(
-                            "Do you understand the risks and want to continue?", False
-                        ):
+                        self.console.print(f"[yellow]Warning: {warning_msg}[/yellow]")
+                        risk_confirm = Confirm.ask(
+                            "Do you understand the risks?", default=False
+                        )
+                        if not risk_confirm:
                             self.console.print("[yellow]Operation cancelled.[/yellow]")
                             continue
 
-                    # Confirm execution
-                    if not self.user_input.confirm_execution(selected_features):
+                    # Final verification
+                    if not selected_features:
+                        self.console.print("[yellow]No features selected.[/yellow]")
+                        continue
+
+                    count = len(selected_features)
+                    msg = f"\n[cyan]Selected {count} features for spoofing[/cyan]"
+                    self.console.print(msg)
+                    if not Confirm.ask("Proceed with spoofing?", default=False):
                         self.console.print("[yellow]Operation cancelled.[/yellow]")
                         continue
 
-                    # Execute features
-                    results = self.run_selected_features(selected_features)
+                    # Step 2: Capture before state and execute features
+                    from ui.tables import _get_current_identifiers
 
-                    # Display results
+                    before_identifiers = _get_current_identifiers()
+
+                    self.run_selected_features(selected_features)
+
+                    # Step 3: Capture after state and display comparison
+                    after_identifiers = _get_current_identifiers()
+
                     self.console.print()
-                    self.display_results(results)
+                    comparison = comparison_table(before_identifiers, after_identifiers)
+                    self.console.print(comparison)
                     self.console.print()
 
                 elif choice == "3":
@@ -289,7 +304,6 @@ class VSCodeSpoofer:
 
 
 def main() -> None:
-    """Main entry point for the application."""
     app = VSCodeSpoofer()
     app.run()
 
