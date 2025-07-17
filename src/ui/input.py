@@ -1,223 +1,216 @@
 #!/usr/bin/env python3
 """
-Feature Input Manager - Collect user input for all VSCode Spoofer features
+Feature Input Manager - Handles user input for all VSCode Spoofer features
 """
-
-from __future__ import annotations
 
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Confirm
 from rich.table import Table
-from rich.text import Text
 
 
 class FeatureInputManager:
-    """Manages input collection for all VSCode Spoofer features."""
+    """Manages user input for all spoofing features with Rich TUI."""
 
-    def __init__(self) -> None:
-        """Initialize the input manager."""
+    def __init__(self):
+        """Initialize the feature input manager."""
         self.console = Console()
+        self.selections: dict[str, bool] = {}
+
+        # Define all available features with their properties
         self.features = [
             {
                 "name": "MAC Address",
-                "description": "Spoof network interface MAC",
+                "description": "Spoof network interface MAC address",
+                "prompt": "Spoof MAC address?",
                 "risk_level": "🟢 Low",
-                "prompt": "Spoof MAC address of the first active network interface?",
-                "selected": False,
+                "icon": "🌐",
+                "default": False,
             },
             {
                 "name": "Machine ID",
                 "description": "Regenerate system machine-id",
+                "prompt": "Regenerate machine ID?",
                 "risk_level": "🟢 Low",
-                "prompt": "Regenerate the system machine-id?",
-                "selected": False,
+                "icon": "🔧",
+                "default": False,
             },
             {
                 "name": "Filesystem UUID",
                 "description": "Randomize root filesystem UUID",
+                "prompt": "Change filesystem UUID?",
                 "risk_level": "🟡 Medium",
-                "prompt": "Randomize root filesystem UUID? (Requires reboot)",
-                "selected": False,
+                "icon": "💾",
+                "default": False,
             },
             {
                 "name": "Hostname",
                 "description": "Set random hostname",
+                "prompt": "Change hostname?",
                 "risk_level": "🟢 Low",
-                "prompt": "Set a random hostname?",
-                "selected": False,
+                "icon": "🏷️",
+                "default": False,
             },
             {
                 "name": "VS Code Caches",
-                "description": "Purge editor caches",
+                "description": "Purge editor caches and extensions",
+                "prompt": "Clear VS Code caches?",
                 "risk_level": "🟢 Low",
-                "prompt": "Purge VS Code, Cursor, and Augment Code caches?",
-                "selected": False,
+                "icon": "🗑️",
+                "default": False,
             },
             {
                 "name": "New User",
                 "description": "Create sandbox user account",
+                "prompt": "Create new user?",
                 "risk_level": "🟢 Low",
-                "prompt": "Create a throw-away user 'vscode_sandbox'?",
-                "selected": False,
+                "icon": "👤",
+                "default": False,
             },
         ]
 
-    def create_header(self) -> Panel:
-        """Create the application header."""
-        title = Text("🔒 VSCode Spoofer - Feature Selection", style="bold magenta")
-        subtitle = Text("Select which operations to perform", style="dim cyan")
-        header_text = Text.assemble(title, "\n", subtitle)
-        return Panel(
-            header_text,
-            style="bright_blue",
+        # Initialize selections with defaults (all False)
+        for feature in self.features:
+            self.selections[feature["name"]] = feature["default"]
+
+    def show_header(self) -> None:
+        """Display the application header."""
+        header = Panel(
+            "[bold blue]🔒 VSCode Spoofer - Feature Selection[/bold blue]\n"
+            "[dim]Select which features to enable (all default to 'n')[/dim]",
+            style="bold blue",
             padding=(1, 2),
         )
+        self.console.print(header)
+        self.console.print()
 
-    def create_features_table(self) -> Table:
-        """Create a table showing all available features."""
+    def show_features_overview(self) -> None:
+        """Display an overview table of all available features."""
         table = Table(
-            title="🛡️ Available Security Features",
-            show_header=True,
-            header_style="bold magenta"
+            title="Available Features", show_header=True, header_style="bold magenta"
         )
-        table.add_column("Selected", justify="center", style="bold", width=8)
-        table.add_column("Feature", style="cyan", no_wrap=True)
-        table.add_column("Description", style="white")
-        table.add_column("Risk Level", justify="center", width=12)
+        table.add_column("Feature", style="cyan", width=20)
+        table.add_column("Description", style="white", width=35)
+        table.add_column("Risk", justify="center", width=12)
+        table.add_column("Default", justify="center", width=10)
 
         for feature in self.features:
-            selected_icon = "✅" if feature["selected"] else "❌"
-            selected_text = Text(
-                selected_icon,
-                style="green" if feature["selected"] else "red"
-            )
-
+            default_text = "No" if not feature["default"] else "Yes"
             table.add_row(
-                selected_text,
-                feature["name"],
+                f"{feature['icon']} {feature['name']}",
                 feature["description"],
-                feature["risk_level"]
+                feature["risk_level"],
+                f"[dim]{default_text}[/dim]",
             )
 
-        return table
+        self.console.print(table)
+        self.console.print()
 
     def collect_feature_inputs(self) -> dict[str, bool]:
-        """Collect input for all features with default 'n'."""
-        self.console.print(self.create_header())
+        """Collect user input for all features."""
+        self.show_header()
+        self.show_features_overview()
+
+        self.console.print("[bold yellow]Feature Selection[/bold yellow]")
+        self.console.print(
+            "[dim]Press Enter to accept default (n) or type 'y' to enable[/dim]"
+        )
         self.console.print()
 
-        # Show initial table
-        self.console.print(self.create_features_table())
-        self.console.print()
-
-        self.console.print("[bold yellow]Configure each feature:[/bold yellow]")
-        self.console.print("[dim]Default is 'n' (no) for all features[/dim]")
-        self.console.print()
-
-        # Collect input for each feature
         for feature in self.features:
-            # Ask for confirmation with default=False (n)
-            response = Confirm.ask(
-                f"🤔 {feature['prompt']} [{feature['risk_level']}]",
-                default=False
-            )
-            feature["selected"] = response
+            # Create a styled prompt
+            prompt_text = f"{feature['icon']} {feature['prompt']}"
 
-            # Show updated status
+            # Show risk level for medium/high risk features
+            if "Medium" in feature["risk_level"] or "High" in feature["risk_level"]:
+                prompt_text += f" [{feature['risk_level']}]"
+
+            # Get user input with default 'n'
+            response = Confirm.ask(prompt_text, default=feature["default"])
+            self.selections[feature["name"]] = response
+
+            # Show immediate feedback
             status = "✅ Selected" if response else "❌ Skipped"
-            style = "green" if response else "red"
-            self.console.print(f"   {Text(status, style=style)}")
+            self.console.print(f"   {status}")
             self.console.print()
 
-        # Show final selection summary
-        self._show_selection_summary()
-
-        # Return results as dictionary
-        return {feature["name"]: feature["selected"] for feature in self.features}
-
-    def _show_selection_summary(self) -> None:
-        """Show a summary of selected features."""
-        self.console.print("[bold yellow]📋 Selection Summary:[/bold yellow]")
-        self.console.print()
-
-        # Create summary table
-        summary_table = Table(
-            title="Selected Operations",
-            show_header=True,
-            header_style="bold green"
-        )
-        summary_table.add_column("Feature", style="cyan", no_wrap=True)
-        summary_table.add_column("Description", style="white")
-        summary_table.add_column("Risk Level", justify="center")
-
-        selected_count = 0
-        for feature in self.features:
-            if feature["selected"]:
-                summary_table.add_row(
-                    feature["name"],
-                    feature["description"],
-                    feature["risk_level"]
-                )
-                selected_count += 1
-
-        if selected_count == 0:
-            summary_table.add_row(
-                Text("No features selected", style="dim italic"),
-                Text("All operations will be skipped", style="dim italic"),
-                Text("—", style="dim")
-            )
-
-        self.console.print(summary_table)
-        self.console.print()
-
-        # Show count
-        if selected_count > 0:
-            message = f"[bold green]✅ {selected_count} feature(s) selected[/bold green]"
-            self.console.print(message)
-        else:
-            self.console.print("[yellow]⚠️ No features selected[/yellow]")
-        self.console.print()
+        return self.selections
 
     def get_selected_features(self) -> list[str]:
         """Get list of selected feature names."""
-        return [feature["name"] for feature in self.features if feature["selected"]]
+        return [name for name, selected in self.selections.items() if selected]
+
+    def get_selections_dict(self) -> dict[str, bool]:
+        """Get the complete selections dictionary."""
+        return self.selections.copy()
+
+    def show_selection_summary(self) -> None:
+        """Display a summary of selected features."""
+        selected_features = self.get_selected_features()
+
+        if not selected_features:
+            panel = Panel(
+                "[yellow]⚠️ No features selected[/yellow]\n"
+                "[dim]All operations will be skipped[/dim]",
+                title="Selection Summary",
+                style="yellow",
+            )
+        else:
+            features_text = "\n".join(
+                [f"• [green]{feature}[/green]" for feature in selected_features]
+            )
+            panel = Panel(
+                f"[bold green]✅ {len(selected_features)} feature(s) selected:[/bold green]\n\n{features_text}",
+                title="Selection Summary",
+                style="green",
+            )
+
+        self.console.print(panel)
+        self.console.print()
 
     def confirm_proceed(self) -> bool:
-        """Ask for final confirmation to proceed."""
+        """Show summary and get final confirmation to proceed."""
+        self.show_selection_summary()
+
         selected_count = len(self.get_selected_features())
 
         if selected_count == 0:
-            message = "[yellow]❌ No features selected. Nothing to do.[/yellow]"
-            self.console.print(message)
-            return False
+            return Confirm.ask(
+                "[yellow]No features selected. Continue anyway?[/yellow]", default=False
+            )
+        else:
+            return Confirm.ask(
+                f"[bold]Proceed with {selected_count} selected operation(s)?[/bold]",
+                default=True,
+            )
 
-        return Confirm.ask(
-            f"🚀 Proceed with {selected_count} selected operation(s)?",
-            default=True
-        )
+    def get_feature_by_name(self, name: str) -> dict | None:
+        """Get feature definition by name."""
+        for feature in self.features:
+            if feature["name"] == name:
+                return feature
+        return None
 
+    def set_feature_selection(self, feature_name: str, selected: bool) -> bool:
+        """Set selection state for a specific feature."""
+        if feature_name in self.selections:
+            self.selections[feature_name] = selected
+            return True
+        return False
 
-def main():
-    """Demo the feature input manager."""
-    manager = FeatureInputManager()
+    def toggle_feature_selection(self, feature_name: str) -> bool:
+        """Toggle selection state for a specific feature."""
+        if feature_name in self.selections:
+            self.selections[feature_name] = not self.selections[feature_name]
+            return True
+        return False
 
-    # Collect inputs
-    selections = manager.collect_feature_inputs()
+    def select_all_features(self) -> None:
+        """Select all features."""
+        for feature_name in self.selections:
+            self.selections[feature_name] = True
 
-    # Show results
-    print("\n" + "="*50)
-    print("FINAL RESULTS:")
-    for feature, selected in selections.items():
-        status = "SELECTED" if selected else "SKIPPED"
-        print(f"  {feature}: {status}")
-
-    # Final confirmation
-    if manager.confirm_proceed():
-        print("\n✅ User confirmed to proceed with operations")
-    else:
-        print("\n❌ User cancelled operations")
-
-
-if __name__ == "__main__":
-    main()
+    def deselect_all_features(self) -> None:
+        """Deselect all features."""
+        for feature_name in self.selections:
+            self.selections[feature_name] = False
