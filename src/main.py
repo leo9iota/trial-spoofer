@@ -161,7 +161,7 @@ class VSCodeSpoofer:
             required_commands = ["ip", "systemctl", "hostnamectl"]
             missing_commands = []
 
-            from .utils.helpers import run_cmd
+            from utils.helpers import run_cmd
 
             for cmd in required_commands:
                 try:
