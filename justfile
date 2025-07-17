@@ -19,6 +19,10 @@ setup:
 run:
     uv run python src/main.py
 
+# Run safe demo version (no system changes)
+run-demo:
+    uv run python demo.py
+
 # Install dependencies
 install:
     uv sync
