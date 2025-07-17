@@ -17,11 +17,11 @@ setup:
 
 # Run spoofer
 run:
-    uv run python src/main.py
-
+    sudo -E $(which uv) run python src/main.py
+    
 # Run safe demo version (no system changes)
 run-demo:
-    uv run python demo.py
+    uv run python src/demo.py
 
 # Install dependencies
 install:
