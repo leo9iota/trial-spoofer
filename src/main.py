@@ -67,21 +67,6 @@ class VSCodeSpoofer:
             custom_username = None
         return create_user(custom_username)
 
-    def create_layout(self) -> Layout:
-        layout = Layout()
-
-        layout.split_column(
-            Layout(self.display_header(), name="header", size=6),
-            Layout(name="main", ratio=1),
-            Layout(name="footer", size=3),
-        )
-
-        layout["main"].split_row(
-            Layout(name="left", ratio=2), Layout(name="right", ratio=3)
-        )
-
-        return layout
-
     def run_selected_features(self, selected_features: list[str]) -> dict[str, bool]:
         results = {}
 
