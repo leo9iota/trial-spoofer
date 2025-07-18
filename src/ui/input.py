@@ -62,9 +62,6 @@ class UserInput:
         return selected_features
 
 
-
-
-
     def get_custom_hostname(self) -> str | None:
         """Get the custom hostname if set."""
         return getattr(self, '_custom_hostname', None)
