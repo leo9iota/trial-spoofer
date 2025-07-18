@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-"""
-Helper utilities for the VS Code Spoofer.
-"""
 
 from __future__ import annotations
 
@@ -14,8 +11,8 @@ from collections.abc import Iterator
 from pathlib import Path
 
 
+# Check if user is running script as root
 def root_check() -> tuple[str, Path]:
-    """Check if running as root and return invoking user and home path."""
     if os.geteuid() != 0:
         sys.exit("Run this script with sudo.")
 
@@ -24,8 +21,8 @@ def root_check() -> tuple[str, Path]:
     return inv_user, home
 
 
+# Thin wrapper around "subprocess.run()" function
 def run_cmd(cmd: str, capture: bool = False, check: bool = True) -> str | None:
-    """Thin wrapper around subprocess.run("cmd", shell=True …)."""
     res: sp.CompletedProcess[str] = sp.run(
         cmd,
         shell=True,
@@ -42,14 +39,14 @@ def run_cmd(cmd: str, capture: bool = False, check: bool = True) -> str | None:
     return res.stdout.strip() if capture and res.stdout else None
 
 
+# Generate random MAC address
 def rand_mac() -> str:
-    """Generate a random MAC address."""
     mac_parts: list[str] = [f"{random.randint(0, 255):02x}" for _ in range(5)]
     return "02:" + ":".join(mac_parts)
 
 
-def clean_vscode_caches(home: Path) -> bool:
-    """Purge VS Code / Cursor / Augment caches under $HOME."""
+# Delete all VSCode caches
+def delete_vscode_caches(home: Path) -> bool:
     try:
         purge_globs: list[str] = [
             ".config/Code*",

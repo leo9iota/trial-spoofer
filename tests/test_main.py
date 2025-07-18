@@ -120,7 +120,7 @@ def test_imports():
         from ui.input import UserInput
         from ui.progress_bar import SpoofingProgress
         from ui.tables import FeatureTable, identifiers_table
-        from utils.helpers import clean_vscode_caches, root_check
+        from utils.helpers import delete_vscode_caches, root_check
         from utils.spoofer import (
             spoof_filesystem_uuid,
             spoof_mac_addr,
