@@ -136,9 +136,9 @@ class VSCodeSpoofer:
                     live.update(self.progress.create_progress_display())
 
                     try:
-                        # Simulate realistic progress
+                        # Execute steps with realistic progress
                         steps = feature_steps.get(feature, ["Executing operation"])
-                        self.progress.simulate_progress(feature, steps)
+                        self.progress.execute_steps(feature, steps)
                         live.update(self.progress.create_progress_display())
 
                         # Execute the actual function
@@ -312,17 +312,45 @@ class VSCodeSpoofer:
                                 expand=False,
                                 padding=(0, 1),
                             )
+                            self.console.print()  # Add spacing before
                             self.console.print(cancel_panel)
+                            self.console.print()  # Add spacing after
                             continue
 
                     # Final verification
                     if not selected_features:
-                        self.console.print("[yellow]\nNo features selected.\n[/yellow]")
+                        no_features_text = "No features selected."
+                        no_features_panel = Panel(
+                            no_features_text,
+                            border_style="yellow",
+                            width=len(no_features_text) + 4,
+                            expand=False,
+                            padding=(0, 1),
+                        )
+                        self.console.print()  # Add spacing before
+                        self.console.print(no_features_panel)
+                        self.console.print()  # Add spacing after
                         continue
 
                     count = len(selected_features)
-                    msg = f"\n[cyan]Selected {count} features for spoofing[/cyan]"
-                    self.console.print(msg)
+                    # Create bullet point list of selected features
+                    feature_list = []
+                    for feature in selected_features:
+                        feature_list.append(f"  • {feature}")
+
+                    selected_text = (
+                        f"Options{count}:\n" +
+                        "\n".join(feature_list)
+                    )
+                    selected_panel = Panel(
+                        selected_text,
+                        border_style="cyan",
+                        expand=False,
+                        padding=(0, 1),
+                    )
+                    self.console.print()  # Add spacing before
+                    self.console.print(selected_panel)
+                    self.console.print()  # Add spacing after
                     if not Confirm.ask("Proceed with spoofing?", default=False):
                         cancel_text = "Operation cancelled."
                         cancel_panel = Panel(
@@ -332,7 +360,9 @@ class VSCodeSpoofer:
                             expand=False,
                             padding=(0, 1),
                         )
+                        self.console.print()  # Add spacing before
                         self.console.print(cancel_panel)
+                        self.console.print()  # Add spacing after
                         continue
 
                     # Step 2: Capture before state and execute features
@@ -365,8 +395,9 @@ class VSCodeSpoofer:
                 expand=False,
                 padding=(0, 1),  # Minimal padding
             )
-            self.console.print()
+            self.console.print()  # Add spacing before
             self.console.print(cancel_panel)
+            self.console.print()  # Add spacing after
             sys.exit(0)
         except Exception as e:
             self.console.print(f"\n[red]Unexpected error: {e}[/red]")

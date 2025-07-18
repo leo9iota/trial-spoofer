@@ -9,7 +9,7 @@ import random
 import subprocess as sp
 from pathlib import Path
 
-from .helpers import log, run_cmd
+from .helpers import run_cmd
 
 
 def change_hostname(custom_hostname: str | None = None) -> bool:
@@ -22,12 +22,9 @@ def change_hostname(custom_hostname: str | None = None) -> bool:
             new_host = f"sandbox-{random_number}"
 
         hostname_cmd: str = f"hostnamectl set-hostname {new_host}"
-        log(hostname_cmd)
         run_cmd(hostname_cmd)
         return True
-    except Exception as e:
-        error_msg: str = str(e)
-        log(f"Failed to change hostname: {error_msg}")
+    except Exception:
         return False
 
 
@@ -58,9 +55,7 @@ def update_boot_config() -> bool:
                 run_cmd(debian_initramfs_cmd, check=False)
 
         return True
-    except Exception as e:
-        error_msg: str = str(e)
-        log(f"Failed to update boot config: {error_msg}")
+    except Exception:
         return False
 
 
@@ -73,15 +68,10 @@ def create_user(custom_username: str | None = None) -> bool:
         if user_check_result != 0:
             random_number: int = random.randint(10000, 99999)
             pw: str = f"Vs@{random_number}"
-            log(f"Adding user {user} (password: {pw})")
             useradd_cmd: str = f"useradd -m {user}"
             passwd_cmd: str = f"echo '{user}:{pw}' | chpasswd"
             run_cmd(useradd_cmd)
             run_cmd(passwd_cmd)
-        else:
-            log("User already exists - skipping.")
         return True
-    except Exception as e:
-        error_msg: str = str(e)
-        log(f"Failed to create user: {error_msg}")
+    except Exception:
         return False

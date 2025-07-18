@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from .helpers import log, rand_mac, run_cmd
+from .helpers import rand_mac, run_cmd
 
 
 def spoof_mac_addr() -> bool:
@@ -20,30 +20,23 @@ def spoof_mac_addr() -> bool:
         )
         if iface:
             new_mac: str = rand_mac()
-            log(f"Setting {iface} MAC {new_mac}")
             run_cmd(f"ip link set dev {iface} down")
             run_cmd(f"ip link set dev {iface} address {new_mac}")
             run_cmd(f"ip link set dev {iface} up")
             return True
         else:
-            log("No active non-loopback NIC found - skipping MAC spoof.")
             return False
-    except Exception as e:
-        error_msg: str = str(e)
-        log(f"Failed to spoof MAC address: {error_msg}")
+    except Exception:
         return False
 
 
 def spoof_machine_id() -> bool:
     """Regenerate /etc/machine-id."""
     try:
-        log("Regenerating machine-id …")
         run_cmd("rm -f /etc/machine-id")
         run_cmd("systemd-machine-id-setup")
         return True
-    except Exception as e:
-        error_msg: str = str(e)
-        log(f"Failed to regenerate machine ID: {error_msg}")
+    except Exception:
         return False
 
 
@@ -54,17 +47,13 @@ def spoof_filesystem_uuid() -> bool:
         fstype: str | None = run_cmd("findmnt -no FSTYPE /", capture=True)
 
         if not root_dev:
-            log("Could not determine root device")
             return False
 
         if fstype == "ext4":
-            log("tune2fs -U random …")
             run_cmd(f"tune2fs -U random {root_dev}")
         elif fstype == "btrfs":
-            log("btrfstune -u …")
             run_cmd(f"btrfstune -u {root_dev}")
         else:
-            log(f"Filesystem {fstype} not supported - skipping UUID change.")
             return False
 
         # Update fstab
@@ -72,7 +61,7 @@ def spoof_filesystem_uuid() -> bool:
             f"blkid -s UUID -o value {root_dev}", capture=True
         )
         if new_uuid:
-            log(f"Updating /etc/fstab with {new_uuid}")
+
             fstab_path: Path = Path("/etc/fstab")
             fstab_content: str = fstab_path.read_text()
             uuid_pattern: str = r"UUID=[A-Fa-f0-9-]+"
@@ -91,7 +80,5 @@ def spoof_filesystem_uuid() -> bool:
                 crypttab_path.write_text(updated_crypttab)
 
         return True
-    except Exception as e:
-        error_msg: str = str(e)
-        log(f"Failed to spoof filesystem UUID: {error_msg}")
+    except Exception:
         return False

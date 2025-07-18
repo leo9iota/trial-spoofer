@@ -14,6 +14,7 @@ from rich.progress import (
     TextColumn,
     TimeElapsedColumn,
 )
+from rich.spinner import Spinner
 from rich.table import Table
 from rich.text import Text
 
@@ -46,6 +47,7 @@ class ProgressBar:
         )
         self.tasks = {}
         self.task_status = {}
+        self.current_steps = {}  # Track current steps for each feature
 
     def start_task(self, feature_name: str) -> None:
         if feature_name not in self.tasks:
@@ -66,26 +68,59 @@ class ProgressBar:
                 task_id, completed=progress_percent, status=status_text
             )
 
-    def simulate_progress(self, feature_name: str, steps: list[str]) -> None:
+    def execute_steps(self, feature_name: str, steps: list[str]) -> None:
+        """Execute steps for a feature with realistic progress updates."""
         if feature_name not in self.tasks:
             return
 
+        self.current_steps[feature_name] = []
         step_progress = 100 // len(steps)
-        current_progress = 0
 
-        for _, step in enumerate(steps):
-            # Update progress description
+        # Create Rich spinner for current step animation
+        current_spinner = Spinner("dots", style="cyan")
+        waiting_spinner = Spinner("dots", style="dim")
+
+        for i, _ in enumerate(steps):
+            # Update task description to show all steps with spinners
             task_id = self.tasks[feature_name]
-            self.progress.update(task_id, description=f"{feature_name}: {step}")
 
-            # Simulate work with incremental progress
-            for _ in range(step_progress):
-                current_progress = min(current_progress + 1, 100)
-                self.progress.update(task_id, completed=current_progress)
-                time.sleep(0.02)  # Small delay for realistic feel
+            # Simulate realistic progress for this step
+            start_progress = i * step_progress
+            end_progress = min((i + 1) * step_progress, 100)
+
+            for progress in range(start_progress, end_progress + 1):
+                # Build the steps display with appropriate spinners/checkmarks
+                steps_display_lines = []
+
+                for j, step_text in enumerate(steps):
+                    if j < i:
+                        # Completed step - show green checkmark
+                        steps_display_lines.append(f"  [green]✓[/green] {step_text}")
+                    elif j == i:
+                        # Current step - show animated cyan spinner
+                        # Use Rich's spinner frame based on progress
+                        spinner_frame = current_spinner.render(time.time())
+                        steps_display_lines.append(f"  {spinner_frame} {step_text}")
+                    else:
+                        # Future step - show dim waiting spinner
+                        waiting_frame = waiting_spinner.render(time.time())
+                        steps_display_lines.append(f"  {waiting_frame} {step_text}")
+
+                steps_display = "\n".join(steps_display_lines)
+                description = f"{feature_name}:\n{steps_display}"
+                self.progress.update(
+                    task_id, description=description, completed=progress
+                )
+                time.sleep(0.03)  # Realistic delay
 
             # Brief pause between steps
-            time.sleep(0.1)
+            time.sleep(0.2)
+
+        # Final update with all steps completed
+        final_steps = [f"  [green]✓[/green] {step}" for step in steps]
+        final_display = "\n".join(final_steps)
+        description = f"{feature_name}:\n{final_display}"
+        self.progress.update(task_id, description=description, completed=100)
 
     def complete_task(self, feature_name: str, success: bool) -> None:
         if feature_name in self.tasks:
@@ -103,7 +138,7 @@ class ProgressBar:
             title="[bold cyan]Execution Progress[/bold cyan]",
             border_style="cyan",
             padding=(1, 2),
-            width=100,  # Fixed width of 100 characters
+            width=120,  # Wider to accommodate multi-line descriptions
             expand=False,  # Don't expand to full terminal width
         )
 
