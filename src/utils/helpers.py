@@ -48,9 +48,6 @@ def rand_mac() -> str:
     return "02:" + ":".join(mac_parts)
 
 
-
-
-
 def clean_vscode_caches(home: Path) -> bool:
     """Purge VS Code / Cursor / Augment caches under $HOME."""
     try:
