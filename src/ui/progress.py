@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""
-Progress UI components for indicating state of operations.
-"""
 
 from __future__ import annotations
+
+import time
 
 from rich.panel import Panel
 from rich.progress import (
@@ -58,6 +57,36 @@ class ProgressBar:
 
         self.progress.update(self.tasks[feature_name], completed=0, status="")
 
+    def update_task_progress(
+        self, feature_name: str, progress_percent: int, status_text: str = ""
+    ) -> None:
+        if feature_name in self.tasks:
+            task_id = self.tasks[feature_name]
+            self.progress.update(
+                task_id, completed=progress_percent, status=status_text
+            )
+
+    def simulate_progress(self, feature_name: str, steps: list[str]) -> None:
+        if feature_name not in self.tasks:
+            return
+
+        step_progress = 100 // len(steps)
+        current_progress = 0
+
+        for _, step in enumerate(steps):
+            # Update progress description
+            task_id = self.tasks[feature_name]
+            self.progress.update(task_id, description=f"{feature_name}: {step}")
+
+            # Simulate work with incremental progress
+            for _ in range(step_progress):
+                current_progress = min(current_progress + 1, 100)
+                self.progress.update(task_id, completed=current_progress)
+                time.sleep(0.02)  # Small delay for realistic feel
+
+            # Brief pause between steps
+            time.sleep(0.1)
+
     def complete_task(self, feature_name: str, success: bool) -> None:
         if feature_name in self.tasks:
             task_id = self.tasks[feature_name]
@@ -74,6 +103,8 @@ class ProgressBar:
             title="[bold cyan]Execution Progress[/bold cyan]",
             border_style="cyan",
             padding=(1, 2),
+            width=100,  # Fixed width of 100 characters
+            expand=False,  # Don't expand to full terminal width
         )
 
     def get_summary_table(self) -> Table:
