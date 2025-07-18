@@ -15,7 +15,6 @@ from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.prompt import Confirm
-from rich.text import Text
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -39,25 +38,22 @@ class VSCodeSpoofer:
             "MAC Address": spoof_mac_addr,
             "Machine ID": spoof_machine_id,
             "Filesystem UUID": spoof_filesystem_uuid,
-            "Hostname": self._change_hostname_wrapper,
-            "VS Code Caches": self._clean_caches_wrapper,
-            "New User": self._create_user_wrapper,
+            "Hostname": lambda: self._change_hostname(),
+            "VS Code Caches": lambda: delete_vscode_caches(self.home_path),
+            "New User": lambda: self._create_user(),
         }
 
         # User info from root check
         self.invoking_user = ""
         self.home_path = Path()
 
-    def _clean_caches_wrapper(self) -> bool:
-        return delete_vscode_caches(self.home_path)
-
-    def _change_hostname_wrapper(self) -> bool:
+    def _change_hostname(self) -> bool:
         from utils.system import change_hostname
 
         custom_hostname = self.user_input.get_custom_hostname()
         return change_hostname(custom_hostname)
 
-    def _create_user_wrapper(self) -> bool:
+    def _create_user(self) -> bool:
         from utils.system import create_user
 
         custom_username = self.user_input.get_custom_username()
@@ -143,46 +139,7 @@ class VSCodeSpoofer:
 
         return results
 
-    def display_results(self, results: dict[str, bool]) -> None:
-        success_count = sum(1 for success in results.values() if success)
-        total_count = len(results)
-
-        if success_count == total_count:
-            status_style = "green"
-            status_text = "✓ All operations completed successfully!"
-        elif success_count > 0:
-            status_style = "yellow"
-            status_text = (
-                f"! {success_count}/{total_count} operations completed successfully"
-            )
-        else:
-            status_style = "red"
-            status_text = "✗ All operations failed"
-
-        results_text = Text()
-        results_text.append(f"{status_text}\n\n", style=f"bold {status_style}")
-
-        for feature, success in results.items():
-            if success:
-                results_text.append(f"✓ {feature}: Success\n", style="green")
-            else:
-                results_text.append(f"✗ {feature}: Failed\n", style="red")
-
-        if any(results.values()):
-            results_text.append(
-                "\nReboot recommended to apply all changes", style="bold yellow"
-            )
-
-        panel = Panel(
-            results_text,
-            title="[bold]Execution Results[/bold]",
-            border_style="blue",
-            padding=(1, 2),
-        )
-
-        self.console.print(panel)
-
-    def _validate_system_requirements(self) -> bool:
+    def validate_system_requirements(self) -> bool:
         """Validate system requirements before execution."""
         try:
             # Check if we're on Linux
@@ -235,7 +192,7 @@ class VSCodeSpoofer:
             # Check root privileges
             try:
                 self.invoking_user, self.home_path = root_check()
-                if not self._validate_system_requirements():
+                if not self.validate_system_requirements():
                     sys.exit(1)
             except Exception as e:
                 # Use panel only for non-sudo error
@@ -323,7 +280,7 @@ class VSCodeSpoofer:
                         feature_list.append(f"  • {feature}")
 
                     selected_text = (
-                        f"Options{count}:\n" +
+                        f"Options selected: {count}\n" +
                         "\n".join(feature_list)
                     )
                     selected_panel = Panel(

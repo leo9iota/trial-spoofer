@@ -54,7 +54,7 @@ class TestVSCodeSpoofer:
             patch("main.run_cmd") as mock_run_cmd,
         ):
             spoofer = VSCodeSpoofer()
-            result = spoofer._validate_system_requirements()
+            result = spoofer.validate_system_requirements()
             assert result is True
 
             # Check that required commands were validated
@@ -68,7 +68,7 @@ class TestVSCodeSpoofer:
 
         with patch("platform.system", return_value="Windows"):
             spoofer = VSCodeSpoofer()
-            result = spoofer._validate_system_requirements()
+            result = spoofer.validate_system_requirements()
             assert result is False
 
     @patch("main.root_check")
