@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
-"""
-Table UI Components - Rich tables for VSCode Spoofer features and system identifiers
-"""
 
 from rich.console import Console
 from rich.table import Table
 
+from utils.helpers import get_identifiers
+
 
 class FeatureTable:
-    """Manages feature selection and display with Rich tables."""
-
     def __init__(self):
-        """Initialize the feature table manager."""
         self.console = Console()
         self.selections: dict[str, bool] = {}
 
@@ -72,8 +68,12 @@ class FeatureTable:
         print("Feature info")
 
 
+# TODO: Remove wrapper function if unnecessary
+def get_current_identifiers() -> dict[str, str]:
+    return get_identifiers()
+
+
 def identifiers_table() -> Table:
-    """Create a table showing current system identifiers."""
     table = Table(
         title="Current System Identifiers",
         show_header=True,
@@ -85,7 +85,7 @@ def identifiers_table() -> Table:
     table.add_column("Current Value", style="white", width=40)
 
     # Get current system identifiers
-    identifiers = _get_current_identifiers()
+    identifiers = get_current_identifiers()
 
     for identifier, value in identifiers.items():
         table.add_row(identifier, value)
@@ -94,7 +94,6 @@ def identifiers_table() -> Table:
 
 
 def modified_identifiers_table(modifications: dict[str, str]) -> Table:
-    """Create a table showing modified system identifiers."""
     table = Table(
         title="Modified System Identifiers",
         show_header=True,
@@ -109,7 +108,7 @@ def modified_identifiers_table(modifications: dict[str, str]) -> Table:
 
     for identifier, new_value in modifications.items():
         # Get current/old value
-        current_identifiers = _get_current_identifiers()
+        current_identifiers = get_current_identifiers()
         old_value = current_identifiers.get(identifier, "Unknown")
 
         # Truncate long values for display
