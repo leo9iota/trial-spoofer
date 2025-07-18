@@ -85,21 +85,67 @@ class VSCodeSpoofer:
     def run_selected_features(self, selected_features: list[str]) -> dict[str, bool]:
         results = {}
 
+        # Define realistic steps for each feature
+        feature_steps = {
+            "MAC Address": [
+                "Detecting network interfaces",
+                "Taking interface down",
+                "Generating new MAC",
+                "Applying new MAC",
+                "Bringing interface up",
+            ],
+            "Machine ID": [
+                "Backing up current machine-id",
+                "Removing old machine-id",
+                "Generating new machine-id",
+                "Updating system services",
+            ],
+            "Filesystem UUID": [
+                "Detecting filesystem type",
+                "Generating new UUID",
+                "Updating filesystem",
+                "Updating fstab",
+                "Updating bootloader",
+            ],
+            "Hostname": [
+                "Generating new hostname",
+                "Updating system hostname",
+                "Updating network configuration",
+            ],
+            "VS Code Caches": [
+                "Scanning cache directories",
+                "Removing VS Code caches",
+                "Removing Cursor caches",
+                "Cleaning temporary files",
+            ],
+            "New User": [
+                "Generating user credentials",
+                "Creating user account",
+                "Setting up home directory",
+                "Configuring permissions",
+            ],
+        }
+
         with Live(
-            self.progress.create_progress_display(), refresh_per_second=10
+            self.progress.create_progress_display(), refresh_per_second=20
         ) as live:
             for feature in selected_features:
                 if feature in self.feature_functions:
-                    # Update progress
+                    # Start the task
                     self.progress.start_task(feature)
                     live.update(self.progress.create_progress_display())
 
-                    # Execute the function
                     try:
+                        # Simulate realistic progress
+                        steps = feature_steps.get(feature, ["Executing operation"])
+                        self.progress.simulate_progress(feature, steps)
+                        live.update(self.progress.create_progress_display())
+
+                        # Execute the actual function
                         success = self.feature_functions[feature]()
                         results[feature] = success
 
-                        # Update progress with result
+                        # Complete the task
                         if success:
                             self.progress.complete_task(feature, True)
                         else:
@@ -241,7 +287,7 @@ class VSCodeSpoofer:
                     )
 
                     if not selected_features:
-                        self.console.print("[yellow]No features selected.[/yellow]")
+                        self.console.print("[yellow]\nNo features selected.\n[/yellow]")
                         continue
 
                     # Show final warning for high-risk operations
@@ -250,7 +296,7 @@ class VSCodeSpoofer:
                     ]
                     if high_risk_features:
                         warning_msg = (
-                            "High-risk operations selected that may affect system boot. "
+                            "High-risk operations selected that may affect system boot. "  # noqa: E501
                             "Ensure you have a recovery method available."
                         )
                         self.console.print(f"[yellow]Warning: {warning_msg}[/yellow]")
@@ -258,30 +304,46 @@ class VSCodeSpoofer:
                             "Do you understand the risks?", default=False
                         )
                         if not risk_confirm:
-                            self.console.print("[yellow]Operation cancelled.[/yellow]")
+                            cancel_text = "Operation cancelled."
+                            cancel_panel = Panel(
+                                cancel_text,
+                                border_style="yellow",
+                                width=len(cancel_text) + 4,  # +4 for border and padding
+                                expand=False,
+                                padding=(0, 1),
+                            )
+                            self.console.print(cancel_panel)
                             continue
 
                     # Final verification
                     if not selected_features:
-                        self.console.print("[yellow]No features selected.[/yellow]")
+                        self.console.print("[yellow]\nNo features selected.\n[/yellow]")
                         continue
 
                     count = len(selected_features)
                     msg = f"\n[cyan]Selected {count} features for spoofing[/cyan]"
                     self.console.print(msg)
                     if not Confirm.ask("Proceed with spoofing?", default=False):
-                        self.console.print("[yellow]Operation cancelled.[/yellow]")
+                        cancel_text = "Operation cancelled."
+                        cancel_panel = Panel(
+                            cancel_text,
+                            border_style="yellow",
+                            width=len(cancel_text) + 4,  # +4 for border and padding
+                            expand=False,
+                            padding=(0, 1),
+                        )
+                        self.console.print(cancel_panel)
                         continue
 
                     # Step 2: Capture before state and execute features
-                    from ui.tables import _get_current_identifiers
+                    from utils.helpers import get_identifiers
 
-                    before_identifiers = _get_current_identifiers()
+                    before_identifiers = get_identifiers()
 
                     self.run_selected_features(selected_features)
 
                     # Step 3: Capture after state and display comparison
-                    after_identifiers = _get_current_identifiers()
+                    after_identifiers = get_identifiers()
 
                     self.console.print()
                     comparison = comparison_table(before_identifiers, after_identifiers)
@@ -293,7 +355,18 @@ class VSCodeSpoofer:
                     break
 
         except KeyboardInterrupt:
-            self.console.print("\n[yellow]Operation cancelled by user.[/yellow]")
+            # Create a panel that's exactly the width of the text
+            cancel_text = "Operation cancelled by user."
+            cancel_panel = Panel(
+                cancel_text,
+                title="[bold yellow]Cancelled[/bold yellow]",
+                border_style="yellow",
+                width=len(cancel_text) + 4,  # +4 for border and padding
+                expand=False,
+                padding=(0, 1),  # Minimal padding
+            )
+            self.console.print()
+            self.console.print(cancel_panel)
             sys.exit(0)
         except Exception as e:
             self.console.print(f"\n[red]Unexpected error: {e}[/red]")
