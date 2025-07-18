@@ -135,7 +135,7 @@ class ProgressBar:
     def create_progress_display(self) -> Panel:
         return Panel(
             self.progress,
-            title="[bold cyan]Execution Progress[/bold cyan]",
+            title="[bold cyan]Progress[/bold cyan]",
             border_style="cyan",
             padding=(1, 2),
             width=120,  # Wider to accommodate multi-line descriptions

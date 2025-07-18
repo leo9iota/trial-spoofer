@@ -75,7 +75,6 @@ def get_current_identifiers() -> dict[str, str]:
 
 def identifiers_table() -> Table:
     table = Table(
-        title="Current System Identifiers",
         show_header=True,
         header_style="bold cyan",
         border_style="cyan",
@@ -124,9 +123,8 @@ def modified_identifiers_table(modifications: dict[str, str]) -> Table:
 def comparison_table(before_data: dict[str, str], after_data: dict[str, str]) -> Table:
     """Create a side-by-side comparison table of before and after values."""
     table = Table(
-        title="Before/After Comparison",
         show_header=True,
-        header_style="bold cyan",
+        header_style="cyan",
         border_style="cyan",
     )
 
