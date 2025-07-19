@@ -45,7 +45,7 @@ def rand_mac() -> str:
     return "02:" + ":".join(mac_parts)
 
 
-# Delete all VSCode caches
+# Delete all VS Code caches
 def delete_vscode_caches(home: Path) -> bool:
     try:
         purge_globs: list[str] = [
@@ -53,7 +53,6 @@ def delete_vscode_caches(home: Path) -> bool:
             ".vscode*",
             ".config/cursor",
             ".cursor",
-            ".config/Code*",
             ".cache/augment*",
         ]
 
