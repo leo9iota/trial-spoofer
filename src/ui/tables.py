@@ -16,61 +16,28 @@ class FeatureTable:
             {
                 "name": "MAC Address",
                 "description": "Spoof network interface MAC address",
-                "risk_level": "[green]Low[/green]",
-                "icon": "",
-                "status": "Ready",
             },
             {
                 "name": "Machine ID",
                 "description": "Regenerate system machine-id",
-                "risk_level": "[green]Low[/green]",
-                "icon": "",
-                "status": "Ready",
             },
             {
                 "name": "Filesystem UUID",
                 "description": "Randomize root filesystem UUID",
-                "risk_level": "[yellow]Medium[/yellow]",
-                "icon": "",
-                "status": "Ready",
             },
             {
                 "name": "Hostname",
                 "description": "Set random hostname",
-                "risk_level": "[green]Low[/green]",
-                "icon": "",
-                "status": "Ready",
             },
             {
                 "name": "VS Code Caches",
-                "description": "Purge editor caches and extensions",
-                "risk_level": "[green]Low[/green]",
-                "icon": "",
-                "status": "Ready",
+                "description": "Delete VS Code caches and extensions",
             },
             {
-                "name": "New User",
-                "description": "Create sandbox user account",
-                "risk_level": "[green]Low[/green]",
-                "icon": "",
-                "status": "Ready",
-            },
-            {
-                "name": "System Info",
-                "description": "Display comprehensive system information",
-                "risk_level": "[green]Low[/green]",
-                "icon": "",
-                "status": "Ready",
+                "name": "User Account",
+                "description": "Create new user account",
             },
         ]
-
-    def feature_info_table():
-        print("Feature info")
-
-
-# TODO: Remove wrapper function if unnecessary
-def get_current_identifiers() -> dict[str, str]:
-    return get_identifiers()
 
 
 def identifiers_table() -> Table:
@@ -84,7 +51,7 @@ def identifiers_table() -> Table:
     table.add_column("Current Value", style="white", width=40)
 
     # Get current system identifiers
-    identifiers = get_current_identifiers()
+    identifiers = get_identifiers()
 
     for identifier, value in identifiers.items():
         table.add_row(identifier, value)
@@ -107,7 +74,7 @@ def modified_identifiers_table(modifications: dict[str, str]) -> Table:
 
     for identifier, new_value in modifications.items():
         # Get current/old value
-        current_identifiers = get_current_identifiers()
+        current_identifiers = get_identifiers()
         old_value = current_identifiers.get(identifier, "Unknown")
 
         # Truncate long values for display
