@@ -895,6 +895,7 @@ dev = [
 dev = [
     { name = "mypy" },
     { name = "pytest" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -915,4 +916,5 @@ provides-extras = ["dev"]
 dev = [
     { name = "mypy", specifier = ">=1.16.1" },
     { name = "pytest", specifier = ">=8.4.1" },
+    { name = "ruff", specifier = ">=0.12.2" },
 ]

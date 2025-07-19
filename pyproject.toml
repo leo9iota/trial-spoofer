@@ -151,4 +151,5 @@ exclude_lines = [
 dev = [
     "mypy>=1.16.1",
     "pytest>=8.4.1",
+    "ruff>=0.12.2",
 ]
