@@ -9,7 +9,6 @@ from utils.helpers import get_identifiers
 class FeatureTable:
     def __init__(self):
         self.console = Console()
-        self.selections: dict[str, bool] = {}
 
         # Define all available features with their properties
         self.features = [
@@ -34,7 +33,7 @@ class FeatureTable:
                 "description": "Delete VS Code caches and extensions",
             },
             {
-                "name": "User Account",
+                "name": "New User",
                 "description": "Create new user account",
             },
         ]
@@ -58,33 +57,6 @@ def identifiers_table() -> Table:
 
     return table
 
-
-def modified_identifiers_table(modifications: dict[str, str]) -> Table:
-    table = Table(
-        title="Modified System Identifiers",
-        show_header=True,
-        header_style="bold green",
-        border_style="green",
-    )
-
-    table.add_column("Identifier", style="yellow", width=20)
-    table.add_column("Old Value", style="dim white", width=18)
-    table.add_column("New Value", style="bold green", width=18)
-    table.add_column("Status", justify="center", width=12)
-
-    for identifier, new_value in modifications.items():
-        # Get current/old value
-        current_identifiers = get_identifiers()
-        old_value = current_identifiers.get(identifier, "Unknown")
-
-        # Truncate long values for display
-        old_display = old_value[:15] + "..." if len(old_value) > 18 else old_value
-        new_display = new_value[:15] + "..." if len(new_value) > 18 else new_value
-
-        status_text = "[bold green][~] Modified[/bold green]"
-        table.add_row(identifier, old_display, new_display, status_text)
-
-    return table
 
 
 def comparison_table(before_data: dict[str, str], after_data: dict[str, str]) -> Table:
