@@ -48,6 +48,7 @@ class ProgressBar:
         self.tasks = {}
         self.task_status = {}
         self.current_steps = {}  # Track current steps for each feature
+        self.panel = None  # Store the panel to avoid recreating it
 
     def start_task(self, feature_name: str) -> None:
         if feature_name not in self.tasks:
@@ -133,14 +134,16 @@ class ProgressBar:
                 self.task_status[feature_name] = "failed"
 
     def create_progress_display(self) -> Panel:
-        return Panel(
-            self.progress,
-            title="[bold cyan]Progress[/bold cyan]",
-            border_style="cyan",
-            padding=(1, 2),
-            width=120,  # Wider to accommodate multi-line descriptions
-            expand=False,  # Don't expand to full terminal width
-        )
+        if self.panel is None:
+            self.panel = Panel(
+                self.progress,
+                title="[bold cyan]Progress[/bold cyan]",
+                border_style="cyan",
+                padding=(1, 2),
+                width=120,  # Wider to accommodate multi-line descriptions
+                expand=False,  # Don't expand to full terminal width
+            )
+        return self.panel
 
     def get_summary_table(self) -> Table:
         table = Table(

@@ -108,18 +108,16 @@ class VSCodeSpoofer:
 
         with Live(
             self.progress.create_progress_display(), refresh_per_second=20
-        ) as live:
+        ):
             for feature in selected_features:
                 if feature in self.feature_functions:
                     # Start the task
                     self.progress.start_task(feature)
-                    live.update(self.progress.create_progress_display())
 
                     try:
                         # Execute steps with realistic progress
                         steps = feature_steps.get(feature, ["Executing operation"])
                         self.progress.execute_steps(feature, steps)
-                        live.update(self.progress.create_progress_display())
 
                         # Execute the actual function
                         success = self.feature_functions[feature]()
@@ -134,8 +132,6 @@ class VSCodeSpoofer:
                         self.console.print(f"[red]Error executing {feature}: {e}[/red]")
                         results[feature] = False
                         self.progress.complete_task(feature, False)
-
-                    live.update(self.progress.create_progress_display())
 
         return results
 
