@@ -51,7 +51,7 @@ class TestVSCodeSpoofer:
 
         with (
             patch("platform.system", return_value="Linux"),
-            patch("main.run_cmd") as mock_run_cmd,
+            patch("utils.helpers.run_cmd") as mock_run_cmd,
         ):
             spoofer = VSCodeSpoofer()
             result = spoofer.validate_system_requirements()
@@ -82,28 +82,23 @@ class TestVSCodeSpoofer:
         mock_func = MagicMock(return_value=True)
         spoofer.feature_functions = {"Test Feature": mock_func}
 
-        # Mock the progress display
+        # Mock the progress display and Live context
         with (
             patch.object(spoofer.progress, "start_task"),
             patch.object(spoofer.progress, "complete_task"),
-            patch.object(spoofer.progress, "create_progress_display"),
+            patch.object(spoofer.progress, "execute_steps"),
+            patch("main.Live") as mock_live,
         ):
+            # Mock the Live context manager
+            mock_live.return_value.__enter__.return_value = None
+            mock_live.return_value.__exit__.return_value = None
+
             results = spoofer.run_selected_features(["Test Feature"])
 
             assert results == {"Test Feature": True}
             mock_func.assert_called_once()
 
-    def test_display_header(self):
-        """Test header display creation."""
-        with patch("main.root_check"):
-            spoofer = VSCodeSpoofer()
-            header = spoofer.display_header()
 
-            assert header is not None
-            # Check that it's a Panel object
-            from rich.panel import Panel
-
-            assert isinstance(header, Panel)
 
 
 def test_main_function_import():
@@ -118,7 +113,7 @@ def test_imports():
     try:
         import main
         from ui.input import UserInput
-        from ui.progress_bar import SpoofingProgress
+        from ui.progress import ProgressBar
         from ui.tables import FeatureTable, identifiers_table
         from utils.helpers import delete_vscode_caches, root_check
         from utils.spoofer import (
@@ -126,10 +121,22 @@ def test_imports():
             spoof_mac_addr,
             spoof_machine_id,
         )
-        from utils.system import change_hostname, create_user, update_boot_config
+        from utils.system import change_hostname, create_user
 
-        # If we get here, all imports succeeded
-        assert True
+        # Verify that the imports are callable/instantiable
+        assert callable(main.main)
+        assert callable(UserInput)
+        assert callable(ProgressBar)
+        assert callable(FeatureTable)
+        assert callable(identifiers_table)
+        assert callable(delete_vscode_caches)
+        assert callable(root_check)
+        assert callable(spoof_filesystem_uuid)
+        assert callable(spoof_mac_addr)
+        assert callable(spoof_machine_id)
+        assert callable(change_hostname)
+        assert callable(create_user)
+
     except ImportError as e:
         pytest.fail(f"Import failed: {e}")
 
