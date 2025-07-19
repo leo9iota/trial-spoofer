@@ -15,7 +15,6 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 from rich.spinner import Spinner
-from rich.table import Table
 from rich.text import Text
 
 
@@ -47,8 +46,6 @@ class ProgressBar:
         )
         self.tasks = {}
         self.task_status = {}
-        self.current_steps = {}  # Track current steps for each feature
-        self.panel = None  # Store the panel to avoid recreating it
 
     def start_task(self, feature_name: str) -> None:
         if feature_name not in self.tasks:
@@ -74,7 +71,6 @@ class ProgressBar:
         if feature_name not in self.tasks:
             return
 
-        self.current_steps[feature_name] = []
         step_progress = 100 // len(steps)
 
         # Create Rich spinner for current step animation
@@ -134,13 +130,11 @@ class ProgressBar:
                 self.task_status[feature_name] = "failed"
 
     def create_progress_display(self) -> Panel:
-        if self.panel is None:
-            self.panel = Panel(
-                self.progress,
-                title="[bold cyan]Progress[/bold cyan]",
-                border_style="cyan",
-                padding=(1, 2),
-                width=120,  # Wider to accommodate multi-line descriptions
-                expand=False,  # Don't expand to full terminal width
-            )
-        return self.panel
+        return Panel(
+            self.progress,
+            title="[bold cyan]Progress[/bold cyan]",
+            border_style="cyan",
+            padding=(1, 2),
+            width=120,  # Wider to accommodate multi-line descriptions
+            expand=False,  # Don't expand to full terminal width
+        )
