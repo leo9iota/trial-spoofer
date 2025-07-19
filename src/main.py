@@ -2,14 +2,9 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    pass
-
-import os
 
 from rich.console import Console
 from rich.live import Live
