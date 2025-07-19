@@ -144,30 +144,3 @@ class ProgressBar:
                 expand=False,  # Don't expand to full terminal width
             )
         return self.panel
-
-    def get_summary_table(self) -> Table:
-        table = Table(
-            title="Execution Summary",
-            show_header=True,
-            header_style="bold cyan",
-            border_style="cyan",
-        )
-
-        table.add_column("Feature", style="white", width=20)
-        table.add_column("Status", justify="center", width=12)
-        table.add_column("Result", style="white", width=30)
-
-        for feature_name, status in self.task_status.items():
-            if status == "success":
-                status_icon = "[bold green]✓ Success[/bold green]"
-                result_text = "Operation completed successfully"
-            elif status == "failed":
-                status_icon = "[bold red]✗ Failed[/bold red]"
-                result_text = "Operation failed - check logs"
-            else:
-                status_icon = "[yellow]Running[/yellow]"
-                result_text = "Operation in progress"
-
-            table.add_row(feature_name, status_icon, result_text)
-
-        return table
