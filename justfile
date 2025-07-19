@@ -18,10 +18,6 @@ setup:
 # Run spoofer
 run:
     sudo -E $(which uv) run python src/main.py
-    
-# Run safe demo version (no system changes)
-run-demo:
-    uv run python src/demo.py
 
 # Install dependencies
 install:
@@ -34,10 +30,6 @@ add package:
 # Add new development dependency
 add-dev package:
     uv add --dev {{package}}
-
-# Run specific demo
-demo demo:
-    uv run python src/demos/{{demo}}
 
 # Run tests
 test:
