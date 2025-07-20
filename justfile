@@ -33,7 +33,7 @@ add-dev package:
 
 # Run tests
 test:
-    uv run pytest
+    uv run python scripts/run_tests.py
 
 # Run tests with coverage
 test-cov:
