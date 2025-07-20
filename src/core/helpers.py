@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""
-Helpers module
 
-Responsible for providing helper functions, such as for randomizing a MAC address,
-fetching system identifiers, checking for root privileges and system requirements.
-"""
+# Helpers
+#
+# Responsible for providing helper functions, such as a random MAC address generator,
+# root privileges check, etc.
 
 from __future__ import annotations
 
