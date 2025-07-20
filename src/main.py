@@ -41,9 +41,9 @@ class Main:
             "MAC Address": spoof_mac_addr,
             "Machine ID": spoof_machine_id,
             "Filesystem UUID": spoof_filesystem_uuid,
-            "Hostname": change_hostname(), # FIXME: idk
-            "VS Code Caches": spoof_vscode(),
-            "User Account": create_new_user(), # FIXME: idk
+            "Hostname": change_hostname,
+            "VS Code Caches": lambda: spoof_vscode(self.home_path),
+            "User Account": create_new_user,
         }
 
         # User info from root check
