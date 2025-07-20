@@ -1,0 +1,95 @@
+from rich.table import Table
+
+from utils.helpers import get_identifiers
+
+FEATURES_LIST = [
+    {"name": "MAC Address", "description": "Spoof network interface MAC address"},
+    {"name": "Machine ID", "description": "Regenerate system machine-id"},
+    {"name": "Filesystem UUID", "description": "Randomize root filesystem UUID"},
+    {"name": "Hostname", "description": "Set random hostname"},
+    {"name": "VS Code Caches", "description": "Delete VS Code caches and extensions"},
+    {"name": "User Account", "description": "Create new user account"},
+]
+
+SPOOFING_LIST = {
+    "MAC Address": [
+        "Detecting network interfaces",
+        "Taking interface down",
+        "Generating new MAC",
+        "Applying new MAC",
+        "Bringing interface up",
+    ],
+    "Machine ID": [
+        "Backing up current machine-id",
+        "Removing old machine-id",
+        "Generating new machine-id",
+        "Updating system services",
+    ],
+    "Filesystem UUID": [
+        "Detecting filesystem type",
+        "Generating new UUID",
+        "Updating filesystem",
+        "Updating fstab",
+        "Updating bootloader",
+    ],
+    "Hostname": [
+        "Generating new hostname",
+        "Updating system hostname",
+        "Updating network configuration",
+    ],
+    "VS Code Caches": [
+        "Scanning cache directories",
+        "Removing VS Code caches",
+        "Removing Cursor caches",
+        "Cleaning temporary files",
+    ],
+    "User Account": [
+        "Generating user credentials",
+        "Creating user account",
+        "Setting up home directory",
+        "Configuring permissions",
+    ],
+}
+
+
+def draw_features_table() -> Table:
+    table = Table(show_header=True, header_style="bold cyan", border_style="cyan")
+    table.add_column("Feature", style="yellow", width=20)
+    table.add_column("Description", style="white", width=40)
+
+    for feature in FEATURES_LIST:
+        table.add_row(feature["name"], feature["description"])
+
+    return table
+
+
+def draw_identifiers_table() -> Table:
+    table = Table(show_header=True, header_style="bold cyan", border_style="cyan")
+    table.add_column("Identifier", style="yellow", width=20)
+    table.add_column("Current Value", style="white", width=40)
+
+    for identifier, value in get_identifiers().items():
+        display_value = value[:37] + "…" if len(value) > 40 else value
+        table.add_row(identifier, display_value)
+
+    return table
+
+
+def draw_comparison_table(before: dict[str, str], after: dict[str, str]) -> Table:
+    table = Table(show_header=True, header_style="bold cyan", border_style="cyan")
+    table.add_column("Identifier", style="yellow", width=20)
+    table.add_column("Before", style="dim white", width=25)
+    table.add_column("After", style="bold green", width=25)
+    table.add_column("Status", justify="center", width=8)
+
+    for identifier in before.keys():
+        before_val = before.get(identifier, "Unknown")
+        after_val = after.get(identifier, "Unknown")
+
+        before_display = before_val[:22] + "…" if len(before_val) > 25 else before_val
+        after_display = after_val[:22] + "…" if len(after_val) > 25 else after_val
+        status = "[bold green]✓" if before_val != after_val else "[dim]✗"
+
+        table.add_row(identifier, before_display, after_display, status)
+
+    return table
