@@ -2,7 +2,7 @@ from rich.table import Table
 
 from utils.helpers import get_identifiers
 
-FEATURES_LIST = [
+FEATURES = [
     {"name": "MAC Address", "description": "Spoof network interface MAC address"},
     {"name": "Machine ID", "description": "Regenerate system machine-id"},
     {"name": "Filesystem UUID", "description": "Randomize root filesystem UUID"},
@@ -11,53 +11,13 @@ FEATURES_LIST = [
     {"name": "User Account", "description": "Create new user account"},
 ]
 
-SPOOFING_LIST = {
-    "MAC Address": [
-        "Detecting network interfaces",
-        "Taking interface down",
-        "Generating new MAC",
-        "Applying new MAC",
-        "Bringing interface up",
-    ],
-    "Machine ID": [
-        "Backing up current machine-id",
-        "Removing old machine-id",
-        "Generating new machine-id",
-        "Updating system services",
-    ],
-    "Filesystem UUID": [
-        "Detecting filesystem type",
-        "Generating new UUID",
-        "Updating filesystem",
-        "Updating fstab",
-        "Updating bootloader",
-    ],
-    "Hostname": [
-        "Generating new hostname",
-        "Updating system hostname",
-        "Updating network configuration",
-    ],
-    "VS Code Caches": [
-        "Scanning cache directories",
-        "Removing VS Code caches",
-        "Removing Cursor caches",
-        "Cleaning temporary files",
-    ],
-    "User Account": [
-        "Generating user credentials",
-        "Creating user account",
-        "Setting up home directory",
-        "Configuring permissions",
-    ],
-}
-
 
 def draw_features_table() -> Table:
     table = Table(show_header=True, header_style="bold cyan", border_style="cyan")
     table.add_column("Feature", style="yellow", width=20)
     table.add_column("Description", style="white", width=40)
 
-    for feature in FEATURES_LIST:
+    for feature in FEATURES:
         table.add_row(feature["name"], feature["description"])
 
     return table
