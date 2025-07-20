@@ -55,7 +55,7 @@ class TestVSCodeSpoofer:
             patch("utils.helpers.run_cmd") as mock_run_cmd,
         ):
             spoofer = VSCodeSpoofer()
-            result = spoofer.validate_system_requirements()
+            result = spoofer.check_system_requirements()
             assert result is True
 
             # Check that required commands were validated
@@ -69,7 +69,7 @@ class TestVSCodeSpoofer:
 
         with patch("platform.system", return_value="Windows"):
             spoofer = VSCodeSpoofer()
-            result = spoofer.validate_system_requirements()
+            result = spoofer.check_system_requirements()
             assert result is False
 
     @patch("main.root_check")
@@ -113,22 +113,22 @@ def test_imports():
     """Test that all required modules can be imported."""
     try:
         import main
-        from ui.input import UserInput
+        from ui.input import Input
         from ui.progress import ProgressBar
-        from ui.tables import FeatureTable, identifiers_table
+        from ui.tables import Table, identifiers_table
         from utils.helpers import delete_vscode_caches, root_check
         from utils.spoofer import (
             spoof_filesystem_uuid,
             spoof_mac_addr,
             spoof_machine_id,
         )
-        from utils.system import change_hostname, create_user
+        from utils.system import change_hostname, create_new_user
 
         # Verify that the imports are callable/instantiable
         assert callable(main.main)
-        assert callable(UserInput)
+        assert callable(Input)
         assert callable(ProgressBar)
-        assert callable(FeatureTable)
+        assert callable(Table)
         assert callable(identifiers_table)
         assert callable(delete_vscode_caches)
         assert callable(root_check)
@@ -136,7 +136,7 @@ def test_imports():
         assert callable(spoof_mac_addr)
         assert callable(spoof_machine_id)
         assert callable(change_hostname)
-        assert callable(create_user)
+        assert callable(create_new_user)
 
     except ImportError as e:
         pytest.fail(f"Import failed: {e}")
