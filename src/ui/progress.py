@@ -87,7 +87,7 @@ class ProgressBar:
             BarColumn(),
             TaskProgressColumn(),
             TimeElapsedColumn(),
-            console=self.console(),
+            console=self.console,
         )
 
         self.tasks = {}

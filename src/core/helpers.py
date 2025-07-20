@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
+"""
+Helpers module
+
+Responsible for providing helper functions, such as for randomizing a MAC address,
+fetching system identifiers, checking for root privileges and system requirements.
+"""
 
 from __future__ import annotations
 
 import os
+import platform
 import random
-import shutil
-import subprocess as sp
+import subprocess
 import sys
-from collections.abc import Iterator
 from pathlib import Path
 
 
 # Check if user is running script as root
-def root_check() -> tuple[str, Path]:
+def check_root() -> tuple[str, Path]:
     if os.geteuid() != 0:
         sys.exit("Run this script with sudo.")
 
@@ -21,50 +26,40 @@ def root_check() -> tuple[str, Path]:
     return inv_user, home
 
 
-# Thin wrapper around "subprocess.run()" function
-def run_cmd(cmd: str, capture: bool = False, check: bool = True) -> str | None:
-    res: sp.CompletedProcess[str] = sp.run(
-        cmd,
-        shell=True,
-        stdout=sp.PIPE if capture else None,
-        stderr=sp.STDOUT,
-        text=True,
-    )
-    if check and res.returncode != 0:
-        stdout_output: str = res.stdout or ""
-        error_message: str = (
-            f"Command failed ({res.returncode}): {cmd}\n{stdout_output}"
-        )
-        raise RuntimeError(error_message)
-    return res.stdout.strip() if capture and res.stdout else None
+def check_system_requirements(self) -> bool:
+    try:
+        if platform.system() != "Linux":
+            self.user_input.display_error("This tool only works on Linux systems.")
+            return False
+
+        required_commands = ["ip", "systemctl", "hostnamectl"]
+        missing_commands = []
+
+        from utils.helpers import run_cmd
+
+        for cmd in required_commands:
+            try:
+                run_cmd(f"which {cmd}", capture=True)
+            except Exception:
+                missing_commands.append(cmd)
+
+        if missing_commands:
+            self.user_input.display_error(
+                f"Missing required commands: {', '.join(missing_commands)}"
+            )
+            return False
+
+        return True
+
+    except Exception as e:
+        self.user_input.display_error(f"System validation failed: {e}")
+        return False
 
 
 # Generate random MAC address
 def rand_mac() -> str:
     mac_parts: list[str] = [f"{random.randint(0, 255):02x}" for _ in range(5)]
     return "02:" + ":".join(mac_parts)
-
-
-# Delete all VS Code caches
-def delete_vscode_caches(home: Path) -> bool:
-    try:
-        purge_globs: list[str] = [
-            ".config/Code*",
-            ".vscode*",
-            ".config/cursor",
-            ".cursor",
-            ".cache/augment*",
-        ]
-
-        for glob_pattern in purge_globs:
-            cache_paths: Iterator[Path] = home.glob(glob_pattern)
-            for cache_path in cache_paths:
-                if cache_path.exists():
-                    shutil.rmtree(cache_path, ignore_errors=True)
-
-        return True
-    except Exception:
-        return False
 
 
 def get_identifiers() -> dict[str, str]:

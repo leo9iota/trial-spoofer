@@ -1,37 +1,33 @@
 #!/usr/bin/env python3
 """
-Spoofing utilities for MAC address, machine ID, and filesystem UUID.
+Spoofer module
+
+Responsible for spoofing indentifiers, such as MAC address,
+filesystem UUID, VS Code, and the machine ID.
 """
 
 from __future__ import annotations
 
-import random
 import re
 import shutil
 from collections.abc import Iterator
 from pathlib import Path
 
+from .helpers import rand_mac
 from .system import run_cmd
 
 
-def rand_mac() -> str:
-    """Generate random MAC address."""
-    mac_parts: list[str] = [f"{random.randint(0, 255):02x}" for _ in range(5)]
-    return "02:" + ":".join(mac_parts)
+def spoof_vscode(home: Path) -> bool:
+    vscode_caches: list[str] = [
+        ".config/Code*",
+        ".vscode*",
+        ".config/cursor",
+        ".cursor",
+        ".cache/augment*",
+    ]
 
-
-def delete_vscode_caches(home: Path) -> bool:
-    """Delete all VS Code caches."""
     try:
-        purge_globs: list[str] = [
-            ".config/Code*",
-            ".vscode*",
-            ".config/cursor",
-            ".cursor",
-            ".cache/augment*",
-        ]
-
-        for glob_pattern in purge_globs:
+        for glob_pattern in vscode_caches:
             cache_paths: Iterator[Path] = home.glob(glob_pattern)
             for cache_path in cache_paths:
                 if cache_path.exists():
@@ -43,7 +39,6 @@ def delete_vscode_caches(home: Path) -> bool:
 
 
 def spoof_mac_addr() -> bool:
-    """Spoof MAC address of the first active, non-loopback NIC."""
     try:
         iface: str | None = run_cmd(
             "ip -o link show | awk -F': ' '!/lo/ {print $2; exit}'",
@@ -62,7 +57,6 @@ def spoof_mac_addr() -> bool:
 
 
 def spoof_machine_id() -> bool:
-    """Regenerate /etc/machine-id."""
     try:
         run_cmd("rm -f /etc/machine-id")
         run_cmd("systemd-machine-id-setup")
@@ -72,7 +66,6 @@ def spoof_machine_id() -> bool:
 
 
 def spoof_filesystem_uuid() -> bool:
-    """Randomize root-filesystem UUID."""
     try:
         root_dev: str | None = run_cmd("findmnt -no SOURCE /", capture=True)
         fstype: str | None = run_cmd("findmnt -no FSTYPE /", capture=True)
@@ -92,7 +85,6 @@ def spoof_filesystem_uuid() -> bool:
             f"blkid -s UUID -o value {root_dev}", capture=True
         )
         if new_uuid:
-
             fstab_path: Path = Path("/etc/fstab")
             fstab_content: str = fstab_path.read_text()
             uuid_pattern: str = r"UUID=[A-Fa-f0-9-]+"

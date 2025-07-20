@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """
-System utilities for hostname changes and boot configuration updates.
+System module
+
+Responsible executing system commands, that change the filesystem UUID,
+user accounts, hostname, etc.
+
+Also executes shell commands.
 """
 
 from __future__ import annotations
 
-import os
-import platform
 import random
 import subprocess
-import sys
-from collections.abc import Iterator
-from pathlib import Path
 
 
+# Thin wrapper around "subprocess.run()" function
 def run_cmd(cmd: str, capture: bool = False, check: bool = True) -> str | None:
     res: subprocess.CompletedProcess[str] = subprocess.run(
         cmd,
@@ -29,108 +30,6 @@ def run_cmd(cmd: str, capture: bool = False, check: bool = True) -> str | None:
         )
         raise RuntimeError(error_message)
     return res.stdout.strip() if capture and res.stdout else None
-
-
-def root_check() -> tuple[str, Path]:
-    if os.geteuid() != 0:
-        sys.exit("Run this script with sudo.")
-
-    inv_user: str = os.environ.get("SUDO_USER") or os.environ.get("USER") or "root"
-    home: Path = Path("/root") if inv_user == "root" else Path(f"/home/{inv_user}")
-    return inv_user, home
-
-
-def get_identifiers() -> dict[str, str]:
-    identifiers = {}
-
-    try:
-        # MAC Address (first active interface)
-        import subprocess
-
-        result = subprocess.run(
-            ["ip", "link", "show"], capture_output=True, text=True, timeout=5
-        )
-        if result.returncode == 0:
-            lines = result.stdout.split("\n")
-            for line in lines:
-                if "link/ether" in line and "state UP" in lines[lines.index(line) - 1]:
-                    mac = line.split("link/ether")[1].split()[0]
-                    identifiers["MAC Address"] = mac
-                    break
-            if "MAC Address" not in identifiers:
-                identifiers["MAC Address"] = "Not found"
-        else:
-            identifiers["MAC Address"] = "Not found"
-    except Exception:
-        identifiers["MAC Address"] = "Not found"
-
-    try:
-        # Machine ID
-        with open("/etc/machine-id") as f:
-            identifiers["Machine ID"] = f.read().strip()
-    except Exception:
-        identifiers["Machine ID"] = "Not found"
-
-    try:
-        # Filesystem UUID (root partition)
-        result = subprocess.run(
-            ["findmnt", "-n", "-o", "UUID", "/"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if result.returncode == 0:
-            identifiers["Filesystem UUID"] = result.stdout.strip()
-        else:
-            identifiers["Filesystem UUID"] = "Not found"
-    except Exception:
-        identifiers["Filesystem UUID"] = "Not found"
-
-    try:
-        # Hostname
-        with open("/etc/hostname") as f:
-            identifiers["Hostname"] = f.read().strip()
-    except Exception:
-        try:
-            result = subprocess.run(
-                ["hostname"], capture_output=True, text=True, timeout=5
-            )
-            if result.returncode == 0:
-                identifiers["Hostname"] = result.stdout.strip()
-            else:
-                identifiers["Hostname"] = "Not found"
-        except Exception:
-            identifiers["Hostname"] = "Not found"
-
-    return identifiers
-
-
-def check_system_requirements(self) -> bool:
-    try:
-        if platform.system() != "Linux":
-            self.user_input.display_error("This tool only works on Linux systems.")
-            return False
-
-        required_commands = ["ip", "systemctl", "hostnamectl"]
-        missing_commands = []
-
-        for cmd in required_commands:
-            try:
-                run_cmd(f"which {cmd}", capture=True)
-            except Exception:
-                missing_commands.append(cmd)
-
-        if missing_commands:
-            self.user_input.display_error(
-                f"Missing required commands: {', '.join(missing_commands)}"
-            )
-            return False
-
-        return True
-
-    except Exception as e:
-        self.user_input.display_error(f"System validation failed: {e}")
-        return False
 
 
 def change_hostname(custom_hostname: str | None = None) -> bool:
