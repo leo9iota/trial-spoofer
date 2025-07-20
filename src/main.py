@@ -14,6 +14,7 @@ from rich.table import Table
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from core.config import get_config
 from core.helpers import check_root, check_system_requirements, get_identifiers
 from core.spoofer import (
     spoof_filesystem_uuid,
@@ -26,12 +27,13 @@ from ui.banner import print_banner
 from ui.input import Input
 from ui.menu import draw_main_menu
 from ui.progress import ProgressBar
-from ui.table import draw_comparison_table, draw_identifiers_table
+from ui.table import FEATURES, draw_comparison_table, draw_identifiers_table
 
 
 class Main:
     def __init__(self):
         self.console = Console()
+        self.config = get_config()
         self.feature_table = Table()
         self.user_input = Input()
         self.progress = ProgressBar(console=self.console)
@@ -122,9 +124,7 @@ class Main:
                     self.console.print()
 
                     # Step 1: Get user input for feature selection (no table display)
-                    selected_features = self.user_input.get_feature_selection(
-                        self.feature_table.features
-                    )
+                    selected_features = self.user_input.get_feature_selection(FEATURES)
 
                     if not selected_features:
                         self.console.print("[yellow]\nNo features selected.\n[/yellow]")
@@ -246,10 +246,4 @@ class Main:
             sys.exit(1)
 
 
-def main() -> None:
-    app = Main()
-    app.run()
-
-
-if __name__ == "__main__":
-    main()
+# Remove the main() function - CLI will handle entry points
