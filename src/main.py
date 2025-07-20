@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ui.banner import print_banner
 from ui.input import Input
 from ui.progress import ProgressBar
+from ui.table import draw_comparison_table, draw_features_table, draw_identifiers_table
 from utils.helpers import delete_vscode_caches, root_check
 from utils.spoofer import spoof_filesystem_uuid, spoof_mac_addr, spoof_machine_id
 
@@ -34,7 +35,7 @@ class Spoofer:
             "Filesystem UUID": spoof_filesystem_uuid,
             "Hostname": lambda: self._change_hostname(),
             "VS Code Caches": lambda: delete_vscode_caches(self.home_path),
-            "New User": lambda: self._create_user(),
+            "User Account": lambda: self._create_user(),
         }
 
         # User info from root check
@@ -132,7 +133,7 @@ class Spoofer:
                 if choice == "1":
                     # List system identifiers
                     self.console.print()
-                    self.console.print(identifiers_table())
+                    self.console.print(draw_identifiers_table())
                     self.console.print()
 
                 elif choice == "2":
