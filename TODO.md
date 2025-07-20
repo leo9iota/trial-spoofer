@@ -18,11 +18,12 @@
   - **Issue:** TypeError - Functions called immediately with `()` instead of stored as references
   - **Fix:** Remove parentheses and use lambda for `spoof_vscode`: `lambda: spoof_vscode(self.home_path)`
 
-### In Progress
-- [ ] **Add missing check_system_requirements method**
+- [x] **Add missing check_system_requirements method**
   - **File:** `src/main.py:94`
   - **Issue:** AttributeError - `'Main' object has no attribute 'check_system_requirements'`
   - **Current Error:** Application crashes after banner display
+
+### In Progress
 
 - [ ] **Add missing feature_steps variable**
   - **File:** `src/main.py:68`
