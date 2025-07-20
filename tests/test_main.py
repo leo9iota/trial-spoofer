@@ -12,7 +12,7 @@ import pytest
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from main import VSCodeSpoofer
+from main import Spoofer
 
 
 class TestVSCodeSpoofer:
@@ -21,7 +21,7 @@ class TestVSCodeSpoofer:
     def test_init(self):
         """Test that VSCodeSpoofer initializes correctly."""
         with patch("main.root_check"):
-            spoofer = VSCodeSpoofer()
+            spoofer = Spoofer()
             assert spoofer.console is not None
             assert spoofer.feature_table is not None
             assert spoofer.user_input is not None
@@ -31,7 +31,7 @@ class TestVSCodeSpoofer:
     def test_feature_functions_mapping(self):
         """Test that all expected features are mapped to functions."""
         with patch("main.root_check"):
-            spoofer = VSCodeSpoofer()
+            spoofer = Spoofer()
             expected_features = [
                 "MAC Address",
                 "Machine ID",
@@ -54,7 +54,7 @@ class TestVSCodeSpoofer:
             patch("platform.system", return_value="Linux"),
             patch("utils.helpers.run_cmd") as mock_run_cmd,
         ):
-            spoofer = VSCodeSpoofer()
+            spoofer = Spoofer()
             result = spoofer.check_system_requirements()
             assert result is True
 
@@ -68,7 +68,7 @@ class TestVSCodeSpoofer:
         mock_root_check.return_value = ("test_user", "/home/test_user")
 
         with patch("platform.system", return_value="Windows"):
-            spoofer = VSCodeSpoofer()
+            spoofer = Spoofer()
             result = spoofer.check_system_requirements()
             assert result is False
 
@@ -77,7 +77,7 @@ class TestVSCodeSpoofer:
         """Test running selected features."""
         mock_root_check.return_value = ("test_user", "/home/test_user")
 
-        spoofer = VSCodeSpoofer()
+        spoofer = Spoofer()
 
         # Mock the feature functions
         mock_func = MagicMock(return_value=True)

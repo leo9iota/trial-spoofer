@@ -20,7 +20,7 @@ from utils.helpers import delete_vscode_caches, root_check
 from utils.spoofer import spoof_filesystem_uuid, spoof_mac_addr, spoof_machine_id
 
 
-class VSCodeSpoofer:
+class Spoofer:
     def __init__(self):
         self.console = Console()
         self.feature_table = Table()
@@ -265,7 +265,7 @@ class VSCodeSpoofer:
 
 
 def main() -> None:
-    app = VSCodeSpoofer()
+    app = Spoofer()
     app.run()
 
 
