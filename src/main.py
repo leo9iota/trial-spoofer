@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import platform
 import sys
 from pathlib import Path
 
@@ -10,18 +11,24 @@ from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.prompt import Confirm
+from rich.table import Table
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from core.spoofer import (
+    spoof_filesystem_uuid,
+    spoof_mac_addr,
+    spoof_machine_id,
+    spoof_vscode,
+)
+from core.system import root_check
 from ui.banner import print_banner
 from ui.input import Input
 from ui.progress import ProgressBar
-from ui.table import draw_comparison_table, draw_features_table, draw_identifiers_table
-from utils.helpers import delete_vscode_caches, root_check
-from utils.spoofer import spoof_filesystem_uuid, spoof_mac_addr, spoof_machine_id
+from ui.table import draw_comparison_table, draw_identifiers_table
 
 
-class Spoofer:
+class Main:
     def __init__(self):
         self.console = Console()
         self.feature_table = Table()
@@ -33,29 +40,14 @@ class Spoofer:
             "MAC Address": spoof_mac_addr,
             "Machine ID": spoof_machine_id,
             "Filesystem UUID": spoof_filesystem_uuid,
-            "Hostname": lambda: self._change_hostname(),
-            "VS Code Caches": lambda: delete_vscode_caches(self.home_path),
-            "User Account": lambda: self._create_user(),
+            "Hostname": change_hostname(), # FIXME: idk
+            "VS Code Caches": spoof_vscode(),
+            "User Account": create_new_user(), # FIXME: idk
         }
 
         # User info from root check
         self.invoking_user = ""
         self.home_path = Path()
-
-    def _change_hostname(self) -> bool:
-        from utils.system import change_hostname
-
-        custom_hostname = self.user_input.get_custom_hostname()
-        return change_hostname(custom_hostname)
-
-    def _create_user(self) -> bool:
-        from utils.system import create_new_user
-
-        custom_username = self.user_input.get_custom_username()
-        # Don't pass "vscode_sandbox" as custom since it's the default
-        if custom_username == "vscode_sandbox":
-            custom_username = None
-        return create_new_user(custom_username)
 
     def run_selected_features(self, selected_features: list[str]) -> dict[str, bool]:
         results = {}
@@ -90,18 +82,6 @@ class Spoofer:
                         self.progress.complete_task(feature, False)
 
         return results
-
-    def draw_main_menu(self) -> str:
-        self.console.print("[bold cyan]Options[/bold cyan]")
-        self.console.print("1. List system identifiers")
-        self.console.print("2. Spoof system identifiers")
-        self.console.print("3. Exit")
-
-        while True:
-            choice = input("\nSelect option (1-3): ").strip()
-            if choice in ["1", "2", "3"]:
-                return choice
-            self.console.print("[red]Invalid choice. Please enter 1, 2, or 3.[/red]")
 
     def run(self) -> None:
         try:
@@ -234,7 +214,9 @@ class Spoofer:
                     after_identifiers = get_identifiers()
 
                     self.console.print()
-                    comparison = comparison_table(before_identifiers, after_identifiers)
+                    comparison = draw_comparison_table(
+                        before_identifiers, after_identifiers
+                    )
                     self.console.print(comparison)
                     self.console.print()
 
@@ -266,7 +248,7 @@ class Spoofer:
 
 
 def main() -> None:
-    app = Spoofer()
+    app = Main()
     app.run()
 
 
