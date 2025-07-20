@@ -1,6 +1,6 @@
 # TODO
 
-## Critical Issues (Application Won't Run)
+## Critical Issues
 
 ### Completed
 - [x] **Fix missing root_check function**
@@ -40,12 +40,12 @@
   - **Impact:** Hostname and User Account spoofing features will fail
 
 ---
+
 ## System
 
 - [ ] Implement `update_boot_config()` function
 - [ ] Implement additional rail guards
 
----
 ## Fix
 
 - [ ] Fix rerender of panel component in progress display
