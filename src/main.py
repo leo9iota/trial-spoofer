@@ -15,13 +15,14 @@ from rich.table import Table
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from core.helpers import check_root, get_identifiers
 from core.spoofer import (
     spoof_filesystem_uuid,
     spoof_mac_addr,
     spoof_machine_id,
     spoof_vscode,
 )
-from core.system import root_check
+from core.system import change_hostname, create_new_user
 from ui.banner import print_banner
 from ui.input import Input
 from ui.progress import ProgressBar
@@ -89,7 +90,7 @@ class Main:
 
             # Check root privileges
             try:
-                self.invoking_user, self.home_path = root_check()
+                self.invoking_user, self.home_path = check_root()
                 if not self.check_system_requirements():
                     sys.exit(1)
             except Exception as e:
@@ -204,8 +205,6 @@ class Main:
                         continue
 
                     # Step 2: Capture before state and execute features
-                    from core.system import get_identifiers
-
                     before_identifiers = get_identifiers()
 
                     self.run_selected_features(selected_features)
