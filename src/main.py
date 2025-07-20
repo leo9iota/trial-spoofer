@@ -14,9 +14,8 @@ from rich.prompt import Confirm
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from ui.banner import print_banner
-from ui.input import UserInput
+from ui.input import Input
 from ui.progress import ProgressBar
-from ui.tables import FeatureTable, comparison_table, identifiers_table
 from utils.helpers import delete_vscode_caches, root_check
 from utils.spoofer import spoof_filesystem_uuid, spoof_mac_addr, spoof_machine_id
 
@@ -24,9 +23,9 @@ from utils.spoofer import spoof_filesystem_uuid, spoof_mac_addr, spoof_machine_i
 class VSCodeSpoofer:
     def __init__(self):
         self.console = Console()
-        self.feature_table = FeatureTable()
-        self.user_input = UserInput()
-        self.progress = ProgressBar()
+        self.feature_table = Table()
+        self.user_input = Input()
+        self.progress = ProgressBar(console=self.console)
 
         # Feature mapping to functions
         self.feature_functions = {
@@ -49,60 +48,21 @@ class VSCodeSpoofer:
         return change_hostname(custom_hostname)
 
     def _create_user(self) -> bool:
-        from utils.system import create_user
+        from utils.system import create_new_user
 
         custom_username = self.user_input.get_custom_username()
         # Don't pass "vscode_sandbox" as custom since it's the default
         if custom_username == "vscode_sandbox":
             custom_username = None
-        return create_user(custom_username)
+        return create_new_user(custom_username)
 
     def run_selected_features(self, selected_features: list[str]) -> dict[str, bool]:
         results = {}
 
-        # Define realistic steps for each feature
-        feature_steps = {
-            "MAC Address": [
-                "Detecting network interfaces",
-                "Taking interface down",
-                "Generating new MAC",
-                "Applying new MAC",
-                "Bringing interface up",
-            ],
-            "Machine ID": [
-                "Backing up current machine-id",
-                "Removing old machine-id",
-                "Generating new machine-id",
-                "Updating system services",
-            ],
-            "Filesystem UUID": [
-                "Detecting filesystem type",
-                "Generating new UUID",
-                "Updating filesystem",
-                "Updating fstab",
-                "Updating bootloader",
-            ],
-            "Hostname": [
-                "Generating new hostname",
-                "Updating system hostname",
-                "Updating network configuration",
-            ],
-            "VS Code Caches": [
-                "Scanning cache directories",
-                "Removing VS Code caches",
-                "Removing Cursor caches",
-                "Cleaning temporary files",
-            ],
-            "New User": [
-                "Generating user credentials",
-                "Creating user account",
-                "Setting up home directory",
-                "Configuring permissions",
-            ],
-        }
-
         with Live(
-            self.progress.create_progress_display(), refresh_per_second=20
+            self.progress.draw_progress(),
+            console=self.console,
+            refresh_per_second=20,
         ):
             for feature in selected_features:
                 if feature in self.feature_functions:
@@ -130,41 +90,7 @@ class VSCodeSpoofer:
 
         return results
 
-    def validate_system_requirements(self) -> bool:
-        """Validate system requirements before execution."""
-        try:
-            # Check if we're on Linux
-            import platform
-
-            if platform.system() != "Linux":
-                self.user_input.display_error("This tool only works on Linux systems.")
-                return False
-
-            # Check for required commands
-            required_commands = ["ip", "systemctl", "hostnamectl"]
-            missing_commands = []
-
-            from utils.helpers import run_cmd
-
-            for cmd in required_commands:
-                try:
-                    run_cmd(f"which {cmd}", capture=True)
-                except Exception:
-                    missing_commands.append(cmd)
-
-            if missing_commands:
-                self.user_input.display_error(
-                    f"Missing required commands: {', '.join(missing_commands)}"
-                )
-                return False
-
-            return True
-
-        except Exception as e:
-            self.user_input.display_error(f"System validation failed: {e}")
-            return False
-
-    def show_main_menu(self) -> str:
+    def draw_main_menu(self) -> str:
         self.console.print("[bold cyan]Options[/bold cyan]")
         self.console.print("1. List system identifiers")
         self.console.print("2. Spoof system identifiers")
@@ -183,7 +109,7 @@ class VSCodeSpoofer:
             # Check root privileges
             try:
                 self.invoking_user, self.home_path = root_check()
-                if not self.validate_system_requirements():
+                if not self.check_system_requirements():
                     sys.exit(1)
             except Exception as e:
                 # Use panel only for non-sudo error
@@ -201,7 +127,7 @@ class VSCodeSpoofer:
 
             # Main menu loop
             while True:
-                choice = self.show_main_menu()
+                choice = self.draw_main_menu()
 
                 if choice == "1":
                     # List system identifiers
@@ -270,9 +196,8 @@ class VSCodeSpoofer:
                     for feature in selected_features:
                         feature_list.append(f"  • {feature}")
 
-                    selected_text = (
-                        f"Options selected: {count}\n" +
-                        "\n".join(feature_list)
+                    selected_text = f"Options selected: {count}\n" + "\n".join(
+                        feature_list
                     )
                     selected_panel = Panel(
                         selected_text,
