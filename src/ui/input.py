@@ -11,7 +11,7 @@ from rich.prompt import Confirm, Prompt
 from rich.text import Text
 
 
-class UserInput:
+class Input:
     """Handles user input and interaction for the VS Code Spoofer."""
 
     def __init__(self):
