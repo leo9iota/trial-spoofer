@@ -12,3 +12,6 @@ __pycache__
 
 # Ruff cache
 .ruff_cache
+
+# Rope project
+.ropeproject
