@@ -10,9 +10,10 @@ from __future__ import annotations
 import os
 import platform
 import random
-import subprocess
 import sys
 from pathlib import Path
+
+from core.system import run_cmd
 
 
 # Check if user is running script as root
@@ -25,16 +26,13 @@ def check_root() -> tuple[str, Path]:
     return inv_user, home
 
 
-def check_system_requirements(self) -> bool:
+def check_system_requirements() -> bool:
     try:
         if platform.system() != "Linux":
-            self.user_input.display_error("This tool only works on Linux systems.")
             return False
 
         required_commands = ["ip", "systemctl", "hostnamectl"]
         missing_commands = []
-
-        from utils.helpers import run_cmd
 
         for cmd in required_commands:
             try:
@@ -43,15 +41,12 @@ def check_system_requirements(self) -> bool:
                 missing_commands.append(cmd)
 
         if missing_commands:
-            self.user_input.display_error(
-                f"Missing required commands: {', '.join(missing_commands)}"
-            )
             return False
 
         return True
 
     except Exception as e:
-        self.user_input.display_error(f"System validation failed: {e}")
+        print(e)
         return False
 
 
