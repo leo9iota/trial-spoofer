@@ -24,6 +24,7 @@ from core.spoofer import (
 from core.system import change_hostname, create_new_user
 from ui.banner import print_banner
 from ui.input import Input
+from ui.menu import draw_main_menu
 from ui.progress import ProgressBar
 from ui.table import draw_comparison_table, draw_identifiers_table
 
@@ -108,7 +109,7 @@ class Main:
 
             # Main menu loop
             while True:
-                choice = self.draw_main_menu()
+                choice = draw_main_menu()
 
                 if choice == "1":
                     # List system identifiers
