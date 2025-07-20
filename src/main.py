@@ -14,7 +14,7 @@ from rich.table import Table
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core.helpers import check_root, get_identifiers
+from core.helpers import check_root, check_system_requirements, get_identifiers
 from core.spoofer import (
     spoof_filesystem_uuid,
     spoof_mac_addr,
@@ -90,7 +90,7 @@ class Main:
             # Check root privileges
             try:
                 self.invoking_user, self.home_path = check_root()
-                if not self.check_system_requirements():
+                if not check_system_requirements():
                     sys.exit(1)
             except Exception as e:
                 # Use panel only for non-sudo error
