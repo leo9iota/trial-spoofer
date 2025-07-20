@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-"""
-System module
 
-Responsible executing system commands, that change the filesystem UUID,
-user accounts, hostname, etc.
-
-Also executes shell commands.
-"""
+# System
+#
+# Responsible executing system commands, that change the filesystem UUID,
+# user accounts, hostname, etc. Also executes shell commands.
 
 from __future__ import annotations
 
@@ -33,7 +30,6 @@ def run_cmd(cmd: str, capture: bool = False, check: bool = True) -> str | None:
 
 
 def change_hostname(custom_hostname: str | None = None) -> bool:
-    """Set a new hostname (custom or random)."""
     try:
         if custom_hostname:
             new_host: str = custom_hostname
@@ -49,7 +45,6 @@ def change_hostname(custom_hostname: str | None = None) -> bool:
 
 
 def create_new_user(custom_username: str | None = None) -> bool:
-    """Create throw-away user (custom name or 'vscode_sandbox')."""
     try:
         user: str = custom_username if custom_username else "vscode_sandbox"
         user_check_cmd: str = f"id -u {user}"
@@ -67,7 +62,6 @@ def create_new_user(custom_username: str | None = None) -> bool:
 
 
 def update_boot_loader() -> bool:
-    """Update GRUB and initramfs."""
     try:
         run_cmd("update-grub")
         run_cmd("update-initramfs -u")
