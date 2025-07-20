@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 
+from rich.console import Console
 from rich.panel import Panel
 from rich.progress import (
     BarColumn,
@@ -17,6 +18,46 @@ from rich.progress import (
 from rich.spinner import Spinner
 from rich.text import Text
 
+SPOOFING_STEPS = {
+    "MAC Address": [
+        "Detecting network interfaces",
+        "Taking interface down",
+        "Generating new MAC",
+        "Applying new MAC",
+        "Bringing interface up",
+    ],
+    "Machine ID": [
+        "Backing up current machine-id",
+        "Removing old machine-id",
+        "Generating new machine-id",
+        "Updating system services",
+    ],
+    "Filesystem UUID": [
+        "Detecting filesystem type",
+        "Generating new UUID",
+        "Updating filesystem",
+        "Updating fstab",
+        "Updating bootloader",
+    ],
+    "Hostname": [
+        "Generating new hostname",
+        "Updating system hostname",
+        "Updating network configuration",
+    ],
+    "VS Code Caches": [
+        "Scanning cache directories",
+        "Removing VS Code caches",
+        "Removing Cursor caches",
+        "Cleaning temporary files",
+    ],
+    "User Account": [
+        "Generating user credentials",
+        "Creating user account",
+        "Setting up home directory",
+        "Configuring permissions",
+    ],
+}
+
 
 class ProgressSpinner(ProgressColumn):
     def __init__(self):
@@ -25,6 +66,7 @@ class ProgressSpinner(ProgressColumn):
 
     def render(self, task):
         status = task.fields.get("status", "")
+
         if status == "✓":
             return Text("✓", style="bold green")
         elif status == "✗":
@@ -36,14 +78,18 @@ class ProgressSpinner(ProgressColumn):
 
 
 class ProgressBar:
-    def __init__(self):
+    def __init__(self, *, console: Console | None = None):
+        self.console = console or Console()
+
         self.progress = Progress(
             ProgressSpinner(),
             TextColumn("[progress.description]{task.description}"),
             BarColumn(),
             TaskProgressColumn(),
             TimeElapsedColumn(),
+            console=self.console(),
         )
+
         self.tasks = {}
         self.task_status = {}
 
@@ -129,12 +175,12 @@ class ProgressBar:
                 self.progress.update(task_id, completed=100, status="✗")
                 self.task_status[feature_name] = "failed"
 
-    def create_progress_display(self) -> Panel:
+    def draw_progress(self) -> Panel:
         return Panel(
             self.progress,
             title="[bold cyan]Progress[/bold cyan]",
             border_style="cyan",
             padding=(1, 2),
-            width=120,  # Wider to accommodate multi-line descriptions
-            expand=False,  # Don't expand to full terminal width
+            width=120,
+            expand=False,
         )
