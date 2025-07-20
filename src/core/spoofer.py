@@ -5,10 +5,41 @@ Spoofing utilities for MAC address, machine ID, and filesystem UUID.
 
 from __future__ import annotations
 
+import random
 import re
+import shutil
+from collections.abc import Iterator
 from pathlib import Path
 
-from .helpers import rand_mac, run_cmd
+from .system import run_cmd
+
+
+def rand_mac() -> str:
+    """Generate random MAC address."""
+    mac_parts: list[str] = [f"{random.randint(0, 255):02x}" for _ in range(5)]
+    return "02:" + ":".join(mac_parts)
+
+
+def delete_vscode_caches(home: Path) -> bool:
+    """Delete all VS Code caches."""
+    try:
+        purge_globs: list[str] = [
+            ".config/Code*",
+            ".vscode*",
+            ".config/cursor",
+            ".cursor",
+            ".cache/augment*",
+        ]
+
+        for glob_pattern in purge_globs:
+            cache_paths: Iterator[Path] = home.glob(glob_pattern)
+            for cache_path in cache_paths:
+                if cache_path.exists():
+                    shutil.rmtree(cache_path, ignore_errors=True)
+
+        return True
+    except Exception:
+        return False
 
 
 def spoof_mac_addr() -> bool:

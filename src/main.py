@@ -224,7 +224,7 @@ class Spoofer:
                         continue
 
                     # Step 2: Capture before state and execute features
-                    from utils.helpers import get_identifiers
+                    from core.system import get_identifiers
 
                     before_identifiers = get_identifiers()
 
