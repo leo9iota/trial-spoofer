@@ -3,7 +3,7 @@
 from .banner import print_banner
 from .input import Input
 from .menu import draw_main_menu
-from .panel import Panel
+# from .panel import Panel  # Panel class not implemented yet
 from .progress import ProgressBar
 from .table import (
     FEATURES,
@@ -20,7 +20,7 @@ __all__ = [
     # Menu
     "draw_main_menu",
     # Panel
-    "Panel",
+    # "Panel",  # Panel class not implemented yet
     # Progress
     "ProgressBar",
     # Table
