@@ -1,6 +1,6 @@
 from rich.table import Table
 
-from core.helpers import get_identifiers
+from ..core.helpers import get_identifiers
 
 FEATURES = [
     {"name": "MAC Address", "description": "Spoof network interface MAC address"},
