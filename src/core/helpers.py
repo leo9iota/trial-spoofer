@@ -13,7 +13,7 @@ import random
 import sys
 from pathlib import Path
 
-from core.system import run_cmd
+from .system import run_cmd
 
 
 # Check if user is running script as root

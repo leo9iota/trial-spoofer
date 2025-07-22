@@ -8,26 +8,25 @@ from pathlib import Path
 
 from rich.console import Console
 from rich.live import Live
-from rich.panel import Panel
 from rich.prompt import Confirm
 from rich.table import Table
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from core.config import get_config
-from core.helpers import check_root, check_system_requirements, get_identifiers
-from core.spoofer import (
+# sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # Not needed with relative imports
+from .core.config import get_config
+from .core.helpers import check_root, check_system_requirements, get_identifiers
+from .core.spoofer import (
     spoof_filesystem_uuid,
     spoof_mac_addr,
     spoof_machine_id,
     spoof_vscode,
 )
-from core.system import change_hostname, create_new_user
-from ui.banner import print_banner
-from ui.input import Input
-from ui.menu import draw_main_menu
-from ui.progress import ProgressBar
-from ui.table import FEATURES, draw_comparison_table, draw_identifiers_table
+from .core.system import change_hostname, create_new_user
+from .ui.banner import print_banner
+from .ui.input import Input
+from .ui.menu import draw_main_menu
+from .ui.panel import Panel
+from .ui.progress import SPOOFING_STEPS, ProgressBar
+from .ui.table import FEATURES, draw_comparison_table, draw_identifiers_table
 
 
 class Main:
@@ -37,6 +36,7 @@ class Main:
         self.feature_table = Table()
         self.user_input = Input()
         self.progress = ProgressBar(console=self.console)
+        self.panel = Panel(console=self.console)
 
         # Feature mapping to functions
         self.feature_functions = {
@@ -67,7 +67,7 @@ class Main:
 
                     try:
                         # Execute steps with realistic progress
-                        steps = feature_steps.get(feature, ["Executing operation"])
+                        steps = SPOOFING_STEPS.get(feature, ["Executing operation"])
                         self.progress.execute_steps(feature, steps)
 
                         # Execute the actual function
@@ -96,17 +96,12 @@ class Main:
                 if not check_system_requirements():
                     sys.exit(1)
             except Exception as e:
-                # Use panel only for non-sudo error
+                # Use panel for error display
                 error_text = (
-                    f"[red]Error: {e}[/red]\n\n"
+                    f"Error: {e}\n\n"
                     "This tool requires root privileges to modify system identifiers."
                 )
-                error_panel = Panel(
-                    error_text,
-                    title="[bold red]Permission Error[/bold red]",
-                    border_style="red",
-                )
-                self.console.print(error_panel)
+                self.panel.error(error_text, "Permission Error")
                 sys.exit(1)
 
             # Main menu loop
@@ -144,32 +139,16 @@ class Main:
                             "Do you understand the risks?", default=False
                         )
                         if not risk_confirm:
-                            cancel_text = "Operation cancelled."
-                            cancel_panel = Panel(
-                                cancel_text,
-                                border_style="yellow",
-                                width=len(cancel_text) + 4,  # +4 for border and padding
-                                expand=False,
-                                padding=(0, 1),
-                            )
-                            self.console.print()  # Add spacing before
-                            self.console.print(cancel_panel)
-                            self.console.print()  # Add spacing after
+                            self.console.print()
+                            self.panel.warning("Operation cancelled.")
+                            self.console.print()
                             continue
 
                     # Final verification
                     if not selected_features:
-                        no_features_text = "No features selected."
-                        no_features_panel = Panel(
-                            no_features_text,
-                            border_style="yellow",
-                            width=len(no_features_text) + 4,
-                            expand=False,
-                            padding=(0, 1),
-                        )
-                        self.console.print()  # Add spacing before
-                        self.console.print(no_features_panel)
-                        self.console.print()  # Add spacing after
+                        self.console.print()
+                        self.panel.warning("No features selected.")
+                        self.console.print()
                         continue
 
                     count = len(selected_features)
@@ -181,27 +160,13 @@ class Main:
                     selected_text = f"Options selected: {count}\n" + "\n".join(
                         feature_list
                     )
-                    selected_panel = Panel(
-                        selected_text,
-                        border_style="cyan",
-                        expand=False,
-                        padding=(0, 1),
-                    )
-                    self.console.print()  # Add spacing before
-                    self.console.print(selected_panel)
-                    self.console.print()  # Add spacing after
+                    self.console.print()
+                    self.panel.info(selected_text, "Selected Features")
+                    self.console.print()
                     if not Confirm.ask("Proceed with spoofing?", default=False):
-                        cancel_text = "Operation cancelled."
-                        cancel_panel = Panel(
-                            cancel_text,
-                            border_style="yellow",
-                            width=len(cancel_text) + 4,  # +4 for border and padding
-                            expand=False,
-                            padding=(0, 1),
-                        )
-                        self.console.print()  # Add spacing before
-                        self.console.print(cancel_panel)
-                        self.console.print()  # Add spacing after
+                        self.console.print()
+                        self.panel.warning("Operation cancelled.")
+                        self.console.print()
                         continue
 
                     # Step 2: Capture before state and execute features
@@ -224,19 +189,9 @@ class Main:
                     break
 
         except KeyboardInterrupt:
-            # Create a panel that's exactly the width of the text
-            cancel_text = "Operation cancelled by user."
-            cancel_panel = Panel(
-                cancel_text,
-                title="[bold yellow]Cancelled[/bold yellow]",
-                border_style="yellow",
-                width=len(cancel_text) + 4,  # +4 for border and padding
-                expand=False,
-                padding=(0, 1),  # Minimal padding
-            )
-            self.console.print()  # Add spacing before
-            self.console.print(cancel_panel)
-            self.console.print()  # Add spacing after
+            self.console.print()
+            self.panel.warning("Operation cancelled by user.", "Cancelled")
+            self.console.print()
             sys.exit(0)
         except Exception as e:
             self.console.print(f"\n[red]Unexpected error: {e}[/red]")
@@ -246,4 +201,40 @@ class Main:
             sys.exit(1)
 
 
-# Remove the main() function - CLI will handle entry points
+def main():
+    """Entry point for the application."""
+    app = Main()
+    app.run()
+
+
+if __name__ == "__main__":
+    # Handle both direct execution and module execution
+    try:
+        main()
+    except ImportError:
+        # Fallback for direct execution - add current directory to path
+        import os
+        import sys
+
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+        # Re-import with absolute imports
+        from core.config import get_config
+        from core.helpers import check_root, check_system_requirements, get_identifiers
+        from core.spoofer import (
+            spoof_filesystem_uuid,
+            spoof_mac_addr,
+            spoof_machine_id,
+            spoof_vscode,
+        )
+        from core.system import change_hostname, create_new_user
+        from ui.banner import print_banner
+        from ui.input import Input
+        from ui.menu import draw_main_menu
+        from ui.panel import Panel
+        from ui.progress import SPOOFING_STEPS, ProgressBar
+        from ui.table import FEATURES, draw_comparison_table, draw_identifiers_table
+
+        # Recreate Main class with absolute imports
+        globals().update(locals())
+        main()

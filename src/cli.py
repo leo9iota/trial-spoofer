@@ -8,9 +8,9 @@ from typing import Optional
 
 from rich.console import Console
 
-from core.config import get_config, reload_config
-from core.helpers import check_root, check_system_requirements
-from main import Main
+from .core.config import get_config, reload_config
+from .core.helpers import check_root, check_system_requirements
+from .main import Main
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -95,7 +95,9 @@ def check_prerequisites() -> bool:
     console = Console()
 
     # Check root permissions
-    if not check_root():
+    try:
+        check_root()  # This function exits if not root, so if we get here, we're root
+    except SystemExit:
         console.print(
             "[bold red]Error:[/bold red] This application requires root privileges."
         )
