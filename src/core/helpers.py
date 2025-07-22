@@ -26,6 +26,7 @@ def check_root() -> tuple[str, Path]:
     return inv_user, home
 
 
+
 def check_system_requirements() -> bool:
     try:
         if platform.system() != "Linux":
