@@ -17,7 +17,7 @@ setup:
 
 # Run spoofer
 run:
-    sudo -E $(which uv) run python src/main.py
+    sudo -E $(which uv) run python -m src
 
 # Install dependencies
 install:
