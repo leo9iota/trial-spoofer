@@ -15,9 +15,17 @@ setup:
     @echo "Setting up development environment..."
     uv sync --dev
 
-# Run spoofer
+# Run spoofer (module mode)
 run:
     sudo -E $(which uv) run python -m src
+
+# Run spoofer (direct mode - fallback)
+run-direct:
+    sudo -E $(which uv) run python src/run.py
+
+# Run spoofer (main.py direct)
+run-main:
+    sudo -E $(which uv) run python src/main.py
 
 # Install dependencies
 install:
