@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-# Helpers
-#
-# Responsible for providing helper functions, such as a random MAC address generator,
-# root privileges check, etc.
+"""
+Helpers
+
+Responsible for providing helper functions, such as a random MAC address generator,
+root privileges check, etc.
+"""
 
 from __future__ import annotations
 
@@ -13,11 +15,23 @@ import random
 import sys
 from pathlib import Path
 
-from .system import run_cmd
+from .command import CmdError, run_cmd
 
 
-# Check if user is running script as root
 def check_root() -> tuple[str, Path]:
+    """
+    Check if user is running script as root and return user info.
+
+    Returns
+    -------
+    tuple[str, Path]
+        Tuple of (username, home_directory)
+
+    Raises
+    ------
+    SystemExit
+        If not running as root.
+    """
     if os.geteuid() != 0:
         sys.exit("Run this script with sudo.")
 
@@ -27,6 +41,13 @@ def check_root() -> tuple[str, Path]:
 
 
 def check_system_requirements() -> bool:
+    """Check if all required system commands are available.
+
+    Returns
+    -------
+    bool
+        True if all requirements are met, False otherwise.
+    """
     try:
         if platform.system() != "Linux":
             return False
@@ -36,17 +57,14 @@ def check_system_requirements() -> bool:
 
         for cmd in required_commands:
             try:
-                run_cmd(f"which {cmd}", capture=True)
-            except Exception:
+                run_cmd(f"which {cmd}")
+            except CmdError:
                 missing_commands.append(cmd)
 
-        if missing_commands:
-            return False
-
-        return True
+        return len(missing_commands) == 0
 
     except Exception as e:
-        print(e)
+        print(f"Error checking system requirements: {e}")
         return False
 
 

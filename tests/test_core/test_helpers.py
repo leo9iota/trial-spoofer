@@ -3,35 +3,46 @@
 import pytest
 from unittest.mock import patch, mock_open, MagicMock
 import subprocess
+from pathlib import Path
 
 from core.helpers import check_root, check_system_requirements, get_identifiers
+from core.command import CmdError
 
 
 class TestHelpers:
     """Test helper functions."""
 
-    def test_check_root_as_root(self):
+    @patch('os.environ.get')
+    def test_check_root_as_root(self, mock_env_get):
         """Test root check when running as root."""
+        mock_env_get.side_effect = lambda key, default=None: {
+            'SUDO_USER': 'testuser',
+            'USER': 'testuser'
+        }.get(key, default)
+        
         with patch('os.geteuid', return_value=0):
-            assert check_root() is True
+            user, home = check_root()
+            assert user == 'testuser'
+            assert home == Path('/home/testuser')
 
     def test_check_root_as_user(self):
         """Test root check when running as regular user."""
         with patch('os.geteuid', return_value=1000):
-            assert check_root() is False
+            with pytest.raises(SystemExit):
+                check_root()
 
-    @patch('subprocess.run')
-    def test_check_system_requirements_success(self, mock_run):
+    @patch('core.helpers.run_cmd')
+    def test_check_system_requirements_success(self, mock_run_cmd):
         """Test system requirements check when all tools are available."""
-        mock_run.return_value.returncode = 0
+        mock_run_cmd.return_value = "/usr/bin/tool"
         
         result = check_system_requirements()
         assert result is True
 
-    @patch('subprocess.run')
-    def test_check_system_requirements_failure(self, mock_run):
+    @patch('core.helpers.run_cmd')
+    def test_check_system_requirements_failure(self, mock_run_cmd):
         """Test system requirements check when tools are missing."""
-        mock_run.side_effect = subprocess.CalledProcessError(1, 'which')
+        mock_run_cmd.side_effect = CmdError("which ip", 1, "", "command not found")
         
         result = check_system_requirements()
         assert result is False
