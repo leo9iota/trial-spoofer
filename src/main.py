@@ -11,7 +11,8 @@ from rich.live import Live
 from rich.prompt import Confirm
 from rich.table import Table
 
-# sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # Not needed with relative imports
+# sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Not needed with relative imports
 from .core.config import get_config
 from .core.spoof import (
     spoof_filesystem_uuid,
@@ -232,7 +233,11 @@ if __name__ == "__main__":
         from ui.menu import draw_main_menu
         from ui.panel import Panel
         from ui.progress import SPOOFING_STEPS, ProgressBar
-        from ui.table import OPTIONS, draw_comparison_table, draw_system_identifiers_table
+        from ui.table import (
+            OPTIONS,
+            draw_comparison_table,
+            draw_system_identifiers_table,
+        )
 
         # Recreate Main class with absolute imports
         globals().update(locals())

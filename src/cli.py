@@ -1,70 +1,13 @@
 #!/usr/bin/env python3
 """Command-line interface for vscode-spoofer."""
 
-import argparse
 import sys
-from pathlib import Path
-from typing import Optional
 
 from rich.console import Console
 
 from .core.config import get_config, reload_config
-from .utils import check_root, check_system_requirements
 from .main import Main
-
-
-def create_parser() -> argparse.ArgumentParser:
-    """Create command-line argument parser."""
-    parser = argparse.ArgumentParser(
-        prog="vscode-spoofer",
-        description="VS Code spoofer for Linux - Modify system identifiers",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  vscode-spoofer                    # Interactive mode
-  vscode-spoofer --check            # Check system requirements only
-  vscode-spoofer --config           # Show current configuration
-  vscode-spoofer --debug            # Run in debug mode
-        """,
-    )
-
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="%(prog)s 0.1.0",
-    )
-
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug mode",
-    )
-
-    parser.add_argument(
-        "--check",
-        action="store_true",
-        help="Check system requirements and exit",
-    )
-
-    parser.add_argument(
-        "--config",
-        action="store_true",
-        help="Show current configuration and exit",
-    )
-
-    parser.add_argument(
-        "--no-confirm",
-        action="store_true",
-        help="Skip confirmation prompts (use with caution)",
-    )
-
-    parser.add_argument(
-        "--backup-path",
-        type=Path,
-        help="Custom backup directory path",
-    )
-
-    return parser
+from .utils import check_root, check_system_requirements
 
 
 def show_config() -> None:
@@ -113,9 +56,9 @@ def check_prerequisites() -> bool:
     return True
 
 
-def main(argv: Optional[list[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     """Main CLI entry point."""
-    parser = create_parser()
+    parser = parse_args()
     args = parser.parse_args(argv)
 
     console = Console()
