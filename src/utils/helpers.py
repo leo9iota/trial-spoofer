@@ -3,7 +3,38 @@ import platform
 import sys
 from pathlib import Path
 
-from ..core.command import CmdError, run_cmd
+from core.command import CmdError, run_cmd
+
+
+def get_current_username() -> str:
+    """Get current username.
+
+    Returns
+    -------
+    str
+        Current username.
+    """
+    return os.environ.get("SUDO_USER") or os.environ.get("USER") or "root"
+
+
+def get_missing_commands() -> list[str]:
+    """Get list of missing required system commands.
+
+    Returns
+    -------
+    list[str]
+        List of missing command names.
+    """
+    required_commands = ["ip", "systemctl", "hostnamectl"]
+    missing_commands = []
+
+    for cmd in required_commands:
+        try:
+            run_cmd(f"which {cmd}")
+        except CmdError:
+            missing_commands.append(cmd)
+
+    return missing_commands
 
 
 def check_root() -> tuple[str, Path]:
@@ -26,26 +57,6 @@ def check_root() -> tuple[str, Path]:
     inv_user: str = os.environ.get("SUDO_USER") or os.environ.get("USER") or "root"
     home: Path = Path("/root") if inv_user == "root" else Path(f"/home/{inv_user}")
     return inv_user, home
-
-
-def get_missing_commands() -> list[str]:
-    """Get list of missing required system commands.
-
-    Returns
-    -------
-    list[str]
-        List of missing command names.
-    """
-    required_commands = ["ip", "systemctl", "hostnamectl"]
-    missing_commands = []
-
-    for cmd in required_commands:
-        try:
-            run_cmd(f"which {cmd}")
-        except CmdError:
-            missing_commands.append(cmd)
-
-    return missing_commands
 
 
 def check_system_requirements() -> bool:
@@ -77,14 +88,3 @@ def is_linux() -> bool:
         True if running on Linux, False otherwise.
     """
     return platform.system() == "Linux"
-
-
-def get_current_user() -> str:
-    """Get current user name.
-
-    Returns
-    -------
-    str
-        Current user name.
-    """
-    return os.environ.get("SUDO_USER") or os.environ.get("USER") or "root"

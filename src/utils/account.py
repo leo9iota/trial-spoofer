@@ -39,7 +39,10 @@ def create_user_account(custom_username: str | None = None) -> bool:
         return False
 
 
-def delete_user(username: str, remove_home: bool = True) -> bool:
+def create_user_password():
+    print("user password")
+
+def delete_user_account(username: str, remove_home: bool = True) -> bool:
     """
     Delete a user account.
 

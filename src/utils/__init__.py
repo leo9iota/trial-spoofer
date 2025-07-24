@@ -1,8 +1,13 @@
 """Utility functions organized by category."""
 
-from .account import create_user_account, delete_user, user_exists
+from .account import (
+    create_user_account,
+    create_user_password,
+    delete_user_account,
+    user_exists,
+)
 from .bootloader import update_boot_loader
-from .check import (
+from .helpers import (
     check_root,
     check_system_requirements,
     get_current_user,
@@ -20,37 +25,40 @@ from .identifiers import (
 from .mac import get_random_mac_address, normalize_mac_address, validate_mac_address
 from .network import (
     get_eligible_network_interfaces,
-    get_interface_info,
+    get_network_interface_info,
     get_network_interfaces,
     is_interface_up,
 )
 
 __all__ = [
-    # System checks
+    # Account
+    "create_user_account",
+    "create_user_password",
+    "delete_user_account",
+    "user_exists",
+    # Bootloader
+    "update_boot_loader",
+    # Helpers
     "check_root",
     "check_system_requirements",
+    "get_current_user",
     "get_missing_commands",
     "is_linux",
-    "get_current_user",
+    # Hostname
+    "change_hostname",
     # Identifiers
-    "get_system_identifiers",
-    "get_mac_address",
-    "get_machine_id",
     "get_filesystem_uuid",
     "get_hostname",
-    # MAC utilities
+    "get_mac_address",
+    "get_machine_id",
+    "get_system_identifiers",
+    # MAC Address
     "get_random_mac_address",
-    "validate_mac_address",
     "normalize_mac_address",
-    # Network utilities
-    "get_network_interfaces",
+    "validate_mac_address",
+    # Network
     "get_eligible_network_interfaces",
-    "get_interface_info",
+    "get_network_interface_info",
+    "get_network_interfaces",
     "is_interface_up",
-    # System management
-    "change_hostname",
-    "update_boot_loader",
-    "create_user_account",
-    "delete_user",
-    "user_exists",
 ]

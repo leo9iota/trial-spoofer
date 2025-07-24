@@ -5,7 +5,8 @@ from .mac import validate_mac_address
 
 
 def get_network_interfaces() -> dict[str, dict[str, str]]:
-    """Get information about available network interfaces.
+    """
+    Get information about available network interfaces.
 
     Returns
     -------
@@ -93,14 +94,15 @@ def get_eligible_network_interfaces() -> list[str]:
     return eligible
 
 
-def get_interface_info(interface_name: str) -> dict[str, str] | None:
-    """Get detailed information about a specific network interface.
-    
+def get_network_interface_info(interface_name: str) -> dict[str, str] | None:
+    """
+    Get detailed information about a specific network interface.
+
     Parameters
     ----------
     interface_name : str
         Name of the interface to query.
-        
+
     Returns
     -------
     dict[str, str] | None
@@ -111,17 +113,18 @@ def get_interface_info(interface_name: str) -> dict[str, str] | None:
 
 
 def is_interface_up(interface_name: str) -> bool:
-    """Check if a network interface is UP.
-    
+    """
+    Check if a network interface is UP.
+
     Parameters
     ----------
     interface_name : str
         Name of the interface to check.
-        
+
     Returns
     -------
     bool
         True if interface is UP, False otherwise.
     """
-    info = get_interface_info(interface_name)
+    info = get_network_interface_info(interface_name)
     return info is not None and info.get("state") == "UP"
