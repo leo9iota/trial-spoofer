@@ -82,7 +82,7 @@ def show_config() -> None:
     console.print(f"Backup Path: {config.backup_path}")
 
     console.print("\n[bold cyan]Enabled Features:[/bold cyan]")
-    enabled_features = config.get_enabled_features()
+    enabled_features = config.get_enabled_options()
     if enabled_features:
         for feature in enabled_features:
             console.print(f"  ✓ {feature}")
