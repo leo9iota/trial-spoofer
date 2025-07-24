@@ -1,8 +1,6 @@
-"""Tests for configuration module."""
+"""Tests for config module."""
 
 import os
-import pytest
-from pathlib import Path
 from unittest.mock import patch
 
 from core.config import Config, get_config, reload_config
@@ -14,7 +12,7 @@ class TestConfig:
     def test_default_config(self):
         """Test default configuration values."""
         config = Config()
-        
+
         assert config.debug is False
         assert config.log_level == "INFO"
         assert config.default_hostname == "random"
@@ -30,12 +28,12 @@ class TestConfig:
             "DEFAULT_HOSTNAME": "test-host",
             "DEFAULT_USERNAME": "test-user",
             "ENABLE_MAC_SPOOFING": "false",
-            "REQUIRE_CONFIRMATION": "false"
+            "REQUIRE_CONFIRMATION": "false",
         }
-        
+
         with patch.dict(os.environ, env_vars):
             config = Config.from_env()
-            
+
             assert config.debug is True
             assert config.log_level == "DEBUG"
             assert config.default_hostname == "test-host"
@@ -43,7 +41,7 @@ class TestConfig:
             assert config.enable_mac_spoofing is False
             assert config.require_confirmation is False
 
-    def test_get_enabled_features(self):
+    def test_get_enabled_options(self):
         """Test getting enabled features."""
         config = Config(
             enable_mac_spoofing=True,
@@ -51,11 +49,11 @@ class TestConfig:
             enable_filesystem_spoofing=True,
             enable_hostname_spoofing=False,
             enable_vscode_spoofing=True,
-            enable_user_creation=False
+            enable_user_creation=False,
         )
-        
-        enabled_features = config.get_enabled_features()
-        
+
+        enabled_features = config.get_enabled_options()
+
         assert "MAC Address" in enabled_features
         assert "Machine ID" not in enabled_features
         assert "Filesystem UUID" in enabled_features
@@ -67,7 +65,7 @@ class TestConfig:
         """Test configuration to dictionary conversion."""
         config = Config()
         config_dict = config.to_dict()
-        
+
         assert isinstance(config_dict, dict)
         assert "debug" in config_dict
         assert "log_level" in config_dict
@@ -77,6 +75,6 @@ class TestConfig:
         """Test global configuration functions."""
         config = get_config()
         assert isinstance(config, Config)
-        
+
         reloaded_config = reload_config()
         assert isinstance(reloaded_config, Config)

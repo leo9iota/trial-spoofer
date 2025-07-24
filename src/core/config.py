@@ -3,7 +3,7 @@
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 
 @dataclass
@@ -89,14 +89,14 @@ class Config:
         # TODO: Implement file-based configuration
         return cls()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary."""
         return {
             field.name: getattr(self, field.name)
             for field in self.__dataclass_fields__.values()
         }
 
-    def get_enabled_features(self) -> list[str]:
+    def get_enabled_options(self) -> list[str]:
         """Get list of enabled features."""
         features = []
         if self.enable_mac_spoofing:

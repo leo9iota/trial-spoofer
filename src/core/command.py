@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import shlex
 import subprocess
-from typing import Optional
 
 
 class CmdError(RuntimeError):
@@ -43,10 +42,10 @@ def run_cmd(
     capture: bool = True,
     check: bool = True,
     shell: bool = False,
-    env: Optional[dict] = None,
-    input: Optional[bytes] = None,
-    timeout: Optional[float] = None,
-    cwd: Optional[str] = None,
+    env: dict | None = None,
+    input: bytes | None = None,
+    timeout: float | None = None,
+    cwd: str | None = None,
 ) -> str:
     """
     Run a shell command with enhanced features and error handling.
