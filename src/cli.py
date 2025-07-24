@@ -9,7 +9,7 @@ from typing import Optional
 from rich.console import Console
 
 from .core.config import get_config, reload_config
-from .core.helpers import check_root, check_system_requirements
+from .utils import check_root, check_system_requirements
 from .main import Main
 
 

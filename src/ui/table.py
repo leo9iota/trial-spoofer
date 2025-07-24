@@ -1,8 +1,8 @@
 from rich.table import Table
 
-from ..core.helpers import get_identifiers
+from ..utils import get_system_identifiers
 
-FEATURES = [
+OPTIONS = [
     {"name": "MAC Address", "description": "Spoof network interface MAC address"},
     {"name": "Machine ID", "description": "Regenerate system machine-id"},
     {"name": "Filesystem UUID", "description": "Randomize root filesystem UUID"},
@@ -12,25 +12,25 @@ FEATURES = [
 ]
 
 
-def draw_features_table() -> Table:
+def draw_options_table() -> Table:
     table = Table(show_header=True, header_style="bold cyan", border_style="cyan")
     table.add_column("Feature", style="yellow", width=20)
     table.add_column("Description", style="white", width=40)
 
-    for feature in FEATURES:
-        table.add_row(feature["name"], feature["description"])
+    for option in OPTIONS:
+        table.add_row(option["name"], option["description"])
 
     return table
 
 
-def draw_identifiers_table() -> Table:
+def draw_system_identifiers_table() -> Table:
     table = Table(show_header=True, header_style="bold cyan", border_style="cyan")
     table.add_column("Identifier", style="yellow", width=20)
     table.add_column("Current Value", style="white", width=40)
 
-    for identifier, value in get_identifiers().items():
+    for system_identifier, value in get_system_identifiers().items():
         display_value = value[:37] + "…" if len(value) > 40 else value
-        table.add_row(identifier, display_value)
+        table.add_row(system_identifier, display_value)
 
     return table
 

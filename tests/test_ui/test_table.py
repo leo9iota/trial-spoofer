@@ -4,9 +4,9 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 from ui.table import (
-    FEATURES,
-    draw_features_table,
-    draw_identifiers_table,
+    OPTIONS,
+    draw_options_table,
+    draw_system_identifiers_table,
     draw_comparison_table,
 )
 
@@ -16,10 +16,10 @@ class TestTable:
 
     def test_features_constant(self):
         """Test FEATURES constant structure."""
-        assert isinstance(FEATURES, list)
-        assert len(FEATURES) > 0
+        assert isinstance(OPTIONS, list)
+        assert len(OPTIONS) > 0
         
-        for feature in FEATURES:
+        for feature in OPTIONS:
             assert isinstance(feature, dict)
             assert "name" in feature
             assert "description" in feature
@@ -28,7 +28,7 @@ class TestTable:
 
     def test_draw_features_table(self):
         """Test drawing features table."""
-        table = draw_features_table()
+        table = draw_options_table()
         
         # Check that it returns a Rich Table object
         assert hasattr(table, 'add_row')
@@ -43,7 +43,7 @@ class TestTable:
             "Hostname": "test-hostname"
         }
         
-        table = draw_identifiers_table()
+        table = draw_system_identifiers_table()
         
         # Check that it returns a Rich Table object
         assert hasattr(table, 'add_row')

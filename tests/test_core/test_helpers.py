@@ -5,7 +5,7 @@ from unittest.mock import patch, mock_open, MagicMock
 import subprocess
 from pathlib import Path
 
-from core.helpers import check_root, check_system_requirements, get_identifiers
+from utils import check_root, check_system_requirements, get_system_identifiers
 from core.command import CmdError
 
 
@@ -72,7 +72,7 @@ class TestHelpers:
         
         mock_run.side_effect = mock_subprocess
         
-        identifiers = get_identifiers()
+        identifiers = get_system_identifiers()
         
         assert isinstance(identifiers, dict)
         assert 'Hostname' in identifiers

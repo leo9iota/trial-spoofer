@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Spoofer module
+Spoof module
 
 Responsible for spoofing identifiers, such as MAC address,
 filesystem UUID, VS Code, and the machine ID.
@@ -17,7 +17,8 @@ from pathlib import Path
 from typing import Optional
 
 from .command import CmdError, run_cmd
-from .helpers import rand_mac, get_network_interfaces, validate_mac_address
+from ..utils.mac import rand_mac, validate_mac_address
+from ..utils.network import get_network_interfaces
 
 
 def spoof_vscode(home: Path) -> bool:
@@ -87,7 +88,26 @@ def get_eligible_interfaces() -> list[str]:
     return eligible
 
 
-def spoof_mac_addr(interface: Optional[str] = None, custom_mac: Optional[str] = None) -> bool:
+def spoof_machine_id() -> bool:
+    """
+    Generate a new machine ID.
+
+    Returns
+    -------
+    bool
+        True if successful, False otherwise.
+    """
+    try:
+        run_cmd("rm -f /etc/machine-id", capture=False)
+        run_cmd("systemd-machine-id-setup", capture=False)
+        return True
+    except (CmdError, subprocess.TimeoutExpired):
+        return False
+
+
+def spoof_mac_addr(
+    interface: Optional[str] = None, custom_mac: Optional[str] = None
+) -> bool:
     """Spoof MAC address of a network interface.
 
     Parameters
@@ -123,11 +143,11 @@ def spoof_mac_addr(interface: Optional[str] = None, custom_mac: Optional[str] = 
                 "ip -o link show | awk -F': ' '!/ lo / && !/LOOPBACK/ {print $2; exit}'",
                 shell=True,
             ).strip()
-            
+
         if not iface:
             _log("[MAC] No eligible interface found; skipping.")
             return False
-            
+
         # Validate interface exists and get current state
         try:
             current_state = run_cmd(f"ip link show {iface}")
@@ -137,7 +157,7 @@ def spoof_mac_addr(interface: Optional[str] = None, custom_mac: Optional[str] = 
         except CmdError:
             _log(f"[MAC] Interface {iface} not found or inaccessible.")
             return False
-            
+
         # Use custom MAC or generate new one
         if custom_mac:
             if not validate_mac_address(custom_mac):
@@ -148,14 +168,14 @@ def spoof_mac_addr(interface: Optional[str] = None, custom_mac: Optional[str] = 
         else:
             new_mac = rand_mac(locally_admin=True, unicast=True)
             _log(f"[MAC] Generated random MAC address: {new_mac}")
-            
+
         _log(f"[MAC] Setting {iface} → {new_mac}")
-        
+
         # Apply MAC address change
         run_cmd(f"ip link set dev {iface} down", capture=False)
         run_cmd(f"ip link set dev {iface} address {new_mac}", capture=False)
         run_cmd(f"ip link set dev {iface} up", capture=False)
-        
+
         # Verify the change was successful
         try:
             verification = run_cmd(f"ip link show {iface}")
@@ -165,31 +185,14 @@ def spoof_mac_addr(interface: Optional[str] = None, custom_mac: Optional[str] = 
                 _log(f"[MAC] Warning: MAC change may not have been applied correctly")
         except CmdError:
             _log(f"[MAC] Warning: Could not verify MAC address change")
-            
+
         return True
-        
+
     except (CmdError, subprocess.TimeoutExpired) as e:
         _log(f"[MAC] ERROR: Command failed - {e}")
         return False
     except Exception as e:
         _log(f"[MAC] ERROR: Unexpected error - {e}")
-        return False
-
-
-def spoof_machine_id() -> bool:
-    """
-    Generate a new machine ID.
-
-    Returns
-    -------
-    bool
-        True if successful, False otherwise.
-    """
-    try:
-        run_cmd("rm -f /etc/machine-id", capture=False)
-        run_cmd("systemd-machine-id-setup", capture=False)
-        return True
-    except (CmdError, subprocess.TimeoutExpired):
         return False
 
 

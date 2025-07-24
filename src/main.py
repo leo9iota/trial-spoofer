@@ -13,8 +13,8 @@ from rich.table import Table
 
 # sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # Not needed with relative imports
 from .core.config import get_config
-from .core.helpers import check_root, check_system_requirements, get_identifiers
-from .core.spoofer import (
+from .utils import check_root, check_system_requirements, get_identifiers
+from .core.spoof import (
     spoof_filesystem_uuid,
     spoof_mac_addr,
     spoof_machine_id,
@@ -26,7 +26,7 @@ from .ui.input import Input
 from .ui.menu import draw_main_menu
 from .ui.panel import Panel
 from .ui.progress import SPOOFING_STEPS, ProgressBar
-from .ui.table import FEATURES, draw_comparison_table, draw_identifiers_table
+from .ui.table import OPTIONS, draw_comparison_table, draw_system_identifiers_table
 
 
 class Main:
@@ -52,7 +52,7 @@ class Main:
         self.invoking_user = ""
         self.home_path = Path()
 
-    def run_selected_features(self, selected_features: list[str]) -> dict[str, bool]:
+    def run_selected_options(self, selected_options: list[str]) -> dict[str, bool]:
         results = {}
 
         with Live(
@@ -60,29 +60,29 @@ class Main:
             console=self.console,
             refresh_per_second=20,
         ):
-            for feature in selected_features:
-                if feature in self.feature_functions:
+            for option in selected_options:
+                if option in self.feature_functions:
                     # Start the task
-                    self.progress.start_task(feature)
+                    self.progress.start_task(option)
 
                     try:
                         # Execute steps with realistic progress
-                        steps = SPOOFING_STEPS.get(feature, ["Executing operation"])
-                        self.progress.execute_steps(feature, steps)
+                        steps = SPOOFING_STEPS.get(option, ["Executing operation"])
+                        self.progress.execute_steps(option, steps)
 
                         # Execute the actual function
-                        success = self.feature_functions[feature]()
-                        results[feature] = success
+                        success = self.feature_functions[option]()
+                        results[option] = success
 
                         # Complete the task
                         if success:
-                            self.progress.complete_task(feature, True)
+                            self.progress.complete_task(option, True)
                         else:
-                            self.progress.complete_task(feature, False)
+                            self.progress.complete_task(option, False)
                     except Exception as e:
-                        self.console.print(f"[red]Error executing {feature}: {e}[/red]")
-                        results[feature] = False
-                        self.progress.complete_task(feature, False)
+                        self.console.print(f"[red]Error executing {option}: {e}[/red]")
+                        results[option] = False
+                        self.progress.complete_task(option, False)
 
         return results
 
@@ -111,7 +111,7 @@ class Main:
                 if choice == "1":
                     # List system identifiers
                     self.console.print()
-                    self.console.print(draw_identifiers_table())
+                    self.console.print(draw_system_identifiers_table())
                     self.console.print()
 
                 elif choice == "2":
@@ -119,7 +119,7 @@ class Main:
                     self.console.print()
 
                     # Step 1: Get user input for feature selection (no table display)
-                    selected_features = self.user_input.get_feature_selection(FEATURES)
+                    selected_features = self.user_input.get_feature_selection(OPTIONS)
 
                     if not selected_features:
                         self.console.print("[yellow]\nNo features selected.\n[/yellow]")
@@ -172,7 +172,7 @@ class Main:
                     # Step 2: Capture before state and execute features
                     before_identifiers = get_identifiers()
 
-                    self.run_selected_features(selected_features)
+                    self.run_selected_options(selected_features)
 
                     # Step 3: Capture after state and display comparison
                     after_identifiers = get_identifiers()
@@ -220,8 +220,8 @@ if __name__ == "__main__":
 
         # Re-import with absolute imports
         from core.config import get_config
-        from core.helpers import check_root, check_system_requirements, get_identifiers
-        from core.spoofer import (
+        from utils import check_root, check_system_requirements, get_identifiers
+        from core.spoof import (
             spoof_filesystem_uuid,
             spoof_mac_addr,
             spoof_machine_id,
@@ -233,7 +233,7 @@ if __name__ == "__main__":
         from ui.menu import draw_main_menu
         from ui.panel import Panel
         from ui.progress import SPOOFING_STEPS, ProgressBar
-        from ui.table import FEATURES, draw_comparison_table, draw_identifiers_table
+        from ui.table import OPTIONS, draw_comparison_table, draw_system_identifiers_table
 
         # Recreate Main class with absolute imports
         globals().update(locals())

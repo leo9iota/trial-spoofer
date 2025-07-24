@@ -1,15 +1,15 @@
 """Core functionality for vscode-spoofer."""
 
 from .config import Config, get_config, reload_config
-from .helpers import (
+from ..utils import (
     check_root,
     check_system_requirements,
-    get_identifiers,
+    get_system_identifiers,
     get_network_interfaces,
     rand_mac,
     validate_mac_address,
 )
-from .spoofer import (
+from .spoof import (
     get_eligible_interfaces,
     spoof_filesystem_uuid,
     spoof_mac_addr,
@@ -26,7 +26,7 @@ __all__ = [
     # Helpers
     "check_root",
     "check_system_requirements",
-    "get_identifiers",
+    "get_system_identifiers",
     "get_network_interfaces",
     "rand_mac",
     "validate_mac_address",
