@@ -15,7 +15,7 @@ from rich.table import Table
 from .core.config import get_config
 from .core.spoof import (
     spoof_filesystem_uuid,
-    spoof_mac_addr,
+    spoof_mac_address,
     spoof_machine_id,
     spoof_vscode,
 )
@@ -25,7 +25,7 @@ from .ui.menu import draw_main_menu
 from .ui.panel import Panel
 from .ui.progress import SPOOFING_STEPS, ProgressBar
 from .ui.table import OPTIONS, draw_comparison_table, draw_system_identifiers_table
-from .utils import check_root, check_system_requirements, get_identifiers
+from .utils import check_root, check_system_requirements, get_system_identifiers
 
 
 class Main:
@@ -39,7 +39,7 @@ class Main:
 
         # Option mapping to functions
         self.option_functions = {
-            "MAC Address": spoof_mac_addr,
+            "MAC Address": spoof_mac_address,
             "Machine ID": spoof_machine_id,
             "Filesystem UUID": spoof_filesystem_uuid,
             "Hostname": change_hostname,
@@ -169,12 +169,12 @@ class Main:
                         continue
 
                     # Step 2: Capture before state and execute features
-                    before_identifiers = get_identifiers()
+                    before_identifiers = get_system_identifiers()
 
                     self.run_selected_options(selected_features)
 
                     # Step 3: Capture after state and display comparison
-                    after_identifiers = get_identifiers()
+                    after_identifiers = get_system_identifiers()
 
                     self.console.print()
                     comparison = draw_comparison_table(
@@ -219,10 +219,10 @@ if __name__ == "__main__":
 
         # Re-import with absolute imports
         from core.config import get_config
-        from utils import check_root, check_system_requirements, get_identifiers
+        from utils import check_root, check_system_requirements, get_system_identifiers
         from core.spoof import (
             spoof_filesystem_uuid,
-            spoof_mac_addr,
+            spoof_mac_address,
             spoof_machine_id,
             spoof_vscode,
         )
