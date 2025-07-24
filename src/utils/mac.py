@@ -1,8 +1,16 @@
+"""
+MAC module (mac.py)
+
+Generates random MAC address, normalizes it, and then validates it. This modules is used
+within the Spoof module (spoof.py).
+"""
+
 import random
 
 
 def get_random_mac_address(*, locally_admin: bool = True, unicast: bool = True) -> str:
-    """Return a random MAC address.
+    """
+    Generate a random MAC address.
 
     Parameters
     ----------
@@ -41,7 +49,8 @@ def get_random_mac_address(*, locally_admin: bool = True, unicast: bool = True) 
 
 
 def normalize_mac_address(mac: str) -> str:
-    """Normalize MAC address to standard format.
+    """
+    Normalize MAC address to standard format.
 
     Parameters
     ----------
@@ -69,7 +78,8 @@ def normalize_mac_address(mac: str) -> str:
 
 
 def validate_mac_address(mac: str) -> bool:
-    """Validate MAC address format.
+    """
+    Validate MAC address format.
 
     Parameters
     ----------
