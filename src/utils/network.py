@@ -91,3 +91,37 @@ def get_eligible_network_interfaces() -> list[str]:
             eligible.append(name)
 
     return eligible
+
+
+def get_interface_info(interface_name: str) -> dict[str, str] | None:
+    """Get detailed information about a specific network interface.
+    
+    Parameters
+    ----------
+    interface_name : str
+        Name of the interface to query.
+        
+    Returns
+    -------
+    dict[str, str] | None
+        Interface information dict or None if not found.
+    """
+    interfaces = get_network_interfaces()
+    return interfaces.get(interface_name)
+
+
+def is_interface_up(interface_name: str) -> bool:
+    """Check if a network interface is UP.
+    
+    Parameters
+    ----------
+    interface_name : str
+        Name of the interface to check.
+        
+    Returns
+    -------
+    bool
+        True if interface is UP, False otherwise.
+    """
+    info = get_interface_info(interface_name)
+    return info is not None and info.get("state") == "UP"

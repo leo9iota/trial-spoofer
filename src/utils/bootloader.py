@@ -1,3 +1,8 @@
+import subprocess
+
+from ..core.command import CmdError, run_cmd
+
+
 def update_boot_loader() -> bool:
     """
     Update boot loader configuration.

@@ -16,9 +16,9 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Optional
 
-from .command import CmdError, run_cmd
-from ..utils.mac import rand_mac, validate_mac_address
+from ..utils.mac import get_random_mac_address, validate_mac_address
 from ..utils.network import get_network_interfaces
+from .command import CmdError, run_cmd
 
 
 def spoof_vscode(home: Path) -> bool:
@@ -166,7 +166,7 @@ def spoof_mac_addr(
             new_mac = custom_mac.lower()
             _log(f"[MAC] Using custom MAC address: {new_mac}")
         else:
-            new_mac = rand_mac(locally_admin=True, unicast=True)
+            new_mac = get_random_mac_address(locally_admin=True, unicast=True)
             _log(f"[MAC] Generated random MAC address: {new_mac}")
 
         _log(f"[MAC] Setting {iface} → {new_mac}")

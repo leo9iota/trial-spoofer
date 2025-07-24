@@ -1,7 +1,7 @@
 import random
 
 
-def rand_mac(*, locally_admin: bool = True, unicast: bool = True) -> str:
+def get_random_mac_address(*, locally_admin: bool = True, unicast: bool = True) -> str:
     """Return a random MAC address.
 
     Parameters
@@ -38,6 +38,34 @@ def rand_mac(*, locally_admin: bool = True, unicast: bool = True) -> str:
     parts = [first] + [random.randint(0, 255) for _ in range(5)]
 
     return ":".join(f"{p:02x}" for p in parts)
+
+
+def normalize_mac_address(mac: str) -> str:
+    """Normalize MAC address to standard format.
+
+    Parameters
+    ----------
+    mac : str
+        MAC address string to normalize.
+
+    Returns
+    -------
+    str
+        Normalized MAC address in format "xx:xx:xx:xx:xx:xx".
+
+    Raises
+    ------
+    ValueError
+        If MAC address format is invalid.
+    """
+    if not validate_mac_address(mac):
+        raise ValueError(f"Invalid MAC address format: {mac}")
+
+    # Remove separators and convert to lowercase
+    clean_mac = mac.replace(":", "").replace("-", "").lower()
+
+    # Add colons every 2 characters
+    return ":".join(clean_mac[i : i + 2] for i in range(0, 12, 2))
 
 
 def validate_mac_address(mac: str) -> bool:

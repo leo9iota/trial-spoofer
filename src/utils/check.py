@@ -28,6 +28,26 @@ def check_root() -> tuple[str, Path]:
     return inv_user, home
 
 
+def get_missing_commands() -> list[str]:
+    """Get list of missing required system commands.
+
+    Returns
+    -------
+    list[str]
+        List of missing command names.
+    """
+    required_commands = ["ip", "systemctl", "hostnamectl"]
+    missing_commands = []
+
+    for cmd in required_commands:
+        try:
+            run_cmd(f"which {cmd}")
+        except CmdError:
+            missing_commands.append(cmd)
+
+    return missing_commands
+
+
 def check_system_requirements() -> bool:
     """Check if all required system commands are available.
 
@@ -40,17 +60,31 @@ def check_system_requirements() -> bool:
         if platform.system() != "Linux":
             return False
 
-        required_commands = ["ip", "systemctl", "hostnamectl"]
-        missing_commands = []
-
-        for cmd in required_commands:
-            try:
-                run_cmd(f"which {cmd}")
-            except CmdError:
-                missing_commands.append(cmd)
-
+        missing_commands = get_missing_commands()
         return len(missing_commands) == 0
 
     except Exception as e:
-        print(f"Error checking system requirements: {e}")
+        print(f"Error checking system requirements: {e}", file=sys.stderr)
         return False
+
+
+def is_linux() -> bool:
+    """Check if running on Linux.
+
+    Returns
+    -------
+    bool
+        True if running on Linux, False otherwise.
+    """
+    return platform.system() == "Linux"
+
+
+def get_current_user() -> str:
+    """Get current user name.
+
+    Returns
+    -------
+    str
+        Current user name.
+    """
+    return os.environ.get("SUDO_USER") or os.environ.get("USER") or "root"

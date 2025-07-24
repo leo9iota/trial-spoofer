@@ -1,3 +1,9 @@
+import random
+import subprocess
+
+from ..core.command import CmdError, run_cmd
+
+
 def change_hostname(custom_hostname: str | None = None) -> bool:
     """
     Change system hostname.

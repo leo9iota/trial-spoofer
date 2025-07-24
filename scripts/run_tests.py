@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Test runner script."""
 
-import subprocess
 import sys
 from pathlib import Path
 
@@ -24,6 +23,7 @@ def run_tests():
     ]
     
     try:
+        import subprocess
         result = subprocess.run(cmd, cwd=project_root, check=False)
         
         if result.returncode == 0:

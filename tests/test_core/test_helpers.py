@@ -5,7 +5,7 @@ from unittest.mock import patch, mock_open, MagicMock
 import subprocess
 from pathlib import Path
 
-from utils import check_root, check_system_requirements, get_system_identifiers
+from utils import check_root, check_system_requirements, get_identifiers
 from core.command import CmdError
 
 
@@ -31,7 +31,7 @@ class TestHelpers:
             with pytest.raises(SystemExit):
                 check_root()
 
-    @patch('core.helpers.run_cmd')
+    @patch('utils.check.run_cmd')
     def test_check_system_requirements_success(self, mock_run_cmd):
         """Test system requirements check when all tools are available."""
         mock_run_cmd.return_value = "/usr/bin/tool"
@@ -39,7 +39,7 @@ class TestHelpers:
         result = check_system_requirements()
         assert result is True
 
-    @patch('core.helpers.run_cmd')
+    @patch('utils.check.run_cmd')
     def test_check_system_requirements_failure(self, mock_run_cmd):
         """Test system requirements check when tools are missing."""
         mock_run_cmd.side_effect = CmdError("which ip", 1, "", "command not found")
@@ -48,32 +48,26 @@ class TestHelpers:
         assert result is False
 
     @patch('builtins.open', new_callable=mock_open, read_data='test-machine-id')
-    @patch('subprocess.run')
-    @patch('socket.gethostname', return_value='test-hostname')
-    def test_get_identifiers(self, mock_hostname, mock_run, mock_file):
+    @patch('utils.identifiers.run_cmd')
+    def test_get_identifiers(self, mock_run_cmd, mock_file):
         """Test getting system identifiers."""
-        # Mock subprocess calls for different commands
-        def mock_subprocess(*args, **kwargs):
-            cmd = args[0]
-            if 'ip link show' in ' '.join(cmd):
-                mock_result = MagicMock()
-                mock_result.stdout = 'link/ether 00:11:22:33:44:55'
-                mock_result.returncode = 0
-                return mock_result
-            elif 'blkid' in ' '.join(cmd):
-                mock_result = MagicMock()
-                mock_result.stdout = 'UUID="12345678-1234-1234-1234-123456789abc"'
-                mock_result.returncode = 0
-                return mock_result
+        # Mock run_cmd calls for different commands
+        def mock_command(cmd, **kwargs):
+            if 'ip link show' in cmd:
+                return '2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP\n    link/ether 00:11:22:33:44:55 brd ff:ff:ff:ff:ff:ff'
+            elif 'findmnt' in cmd:
+                return '12345678-1234-1234-1234-123456789abc'
+            elif 'hostname' in cmd:
+                return 'test-hostname'
             else:
-                mock_result = MagicMock()
-                mock_result.returncode = 1
-                return mock_result
+                raise CmdError(cmd, 1, "", "command not found")
         
-        mock_run.side_effect = mock_subprocess
+        mock_run_cmd.side_effect = mock_command
         
-        identifiers = get_system_identifiers()
+        identifiers = get_identifiers()
         
         assert isinstance(identifiers, dict)
+        assert 'MAC Address' in identifiers
+        assert 'Machine ID' in identifiers
+        assert 'Filesystem UUID' in identifiers
         assert 'Hostname' in identifiers
-        assert identifiers['Hostname'] == 'test-hostname'

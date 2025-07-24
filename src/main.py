@@ -13,20 +13,19 @@ from rich.table import Table
 
 # sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # Not needed with relative imports
 from .core.config import get_config
-from .utils import check_root, check_system_requirements, get_identifiers
 from .core.spoof import (
     spoof_filesystem_uuid,
     spoof_mac_addr,
     spoof_machine_id,
     spoof_vscode,
 )
-from .core.system import change_hostname, create_new_user
 from .ui.banner import print_banner
 from .ui.input import Input
 from .ui.menu import draw_main_menu
 from .ui.panel import Panel
 from .ui.progress import SPOOFING_STEPS, ProgressBar
 from .ui.table import OPTIONS, draw_comparison_table, draw_system_identifiers_table
+from .utils import check_root, check_system_requirements, get_identifiers
 
 
 class Main:
@@ -38,8 +37,8 @@ class Main:
         self.progress = ProgressBar(console=self.console)
         self.panel = Panel(console=self.console)
 
-        # Feature mapping to functions
-        self.feature_functions = {
+        # Option mapping to functions
+        self.option_functions = {
             "MAC Address": spoof_mac_addr,
             "Machine ID": spoof_machine_id,
             "Filesystem UUID": spoof_filesystem_uuid,
@@ -61,7 +60,7 @@ class Main:
             refresh_per_second=20,
         ):
             for option in selected_options:
-                if option in self.feature_functions:
+                if option in self.option_functions:
                     # Start the task
                     self.progress.start_task(option)
 
@@ -71,7 +70,7 @@ class Main:
                         self.progress.execute_steps(option, steps)
 
                         # Execute the actual function
-                        success = self.feature_functions[option]()
+                        success = self.option_functions[option]()
                         results[option] = success
 
                         # Complete the task

@@ -6,7 +6,7 @@ from ..utils import (
     check_system_requirements,
     get_system_identifiers,
     get_network_interfaces,
-    rand_mac,
+    get_random_mac_address,
     validate_mac_address,
 )
 from .spoof import (
@@ -26,9 +26,9 @@ __all__ = [
     # Helpers
     "check_root",
     "check_system_requirements",
-    "get_system_identifiers",
+    "get_identifiers",
     "get_network_interfaces",
-    "rand_mac",
+    "get_random_mac_address",
     "validate_mac_address",
     # Spoofer
     "get_eligible_interfaces",
