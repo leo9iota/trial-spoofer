@@ -19,12 +19,8 @@ setup:
 run:
     sudo -E $(which uv) run python -m src
 
-# Run spoofer (direct mode - fallback)
+# Run spoofer (direct mode)
 run-direct:
-    sudo -E $(which uv) run python src/run.py
-
-# Run spoofer (main.py direct)
-run-main:
     sudo -E $(which uv) run python src/main.py
 
 # Install dependencies
