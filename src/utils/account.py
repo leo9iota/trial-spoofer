@@ -1,51 +1,7 @@
-
 import random
 import subprocess
 
 from ..core.command import CmdError, run_cmd
-
-
-def create_new_user(custom_username: str | None = None) -> bool:
-    """
-    Create a new user account.
-
-    Parameters
-    ----------
-    custom_username : str | None
-        Custom username to create. If None, generates a random username.
-
-    Returns
-    -------
-    bool
-        True if successful, False otherwise.
-    """
-    try:
-        if custom_username:
-            username = custom_username
-        else:
-            random_number = random.randint(1000, 9999)
-            username = f"user{random_number}"
-
-        # Check if user already exists
-        try:
-            run_cmd(f"id {username}")
-            # User exists, return True
-            return True
-        except CmdError:
-            # User doesn't exist, create it
-            pass
-
-        # Create user with home directory
-        run_cmd(f"useradd -m -s /bin/bash {username}", capture=False)
-        
-        # Set a random password
-        random_number = random.randint(10000, 99999)
-        password = f"temp{random_number}"
-        run_cmd("chpasswd", input=f"{username}:{password}".encode(), capture=False)
-        
-        return True
-    except (CmdError, subprocess.TimeoutExpired):
-        return False
 
 
 def create_user_account(custom_username: str | None = None) -> bool:

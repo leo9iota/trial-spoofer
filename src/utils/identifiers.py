@@ -1,7 +1,7 @@
 from ..core.command import CmdError, run_cmd
 
 
-def get_identifiers() -> dict[str, str]:
+def get_system_identifiers() -> dict[str, str]:
     """Get current system identifiers.
 
     Returns
@@ -55,47 +55,47 @@ def get_identifiers() -> dict[str, str]:
 
 def get_mac_address() -> str:
     """Get MAC address of the first active interface.
-    
+
     Returns
     -------
     str
         MAC address or "Not found" if unavailable.
     """
-    identifiers = get_identifiers()
+    identifiers = get_system_identifiers()
     return identifiers.get("MAC Address", "Not found")
 
 
 def get_machine_id() -> str:
     """Get system machine ID.
-    
+
     Returns
     -------
     str
         Machine ID or "Not found" if unavailable.
     """
-    identifiers = get_identifiers()
+    identifiers = get_system_identifiers()
     return identifiers.get("Machine ID", "Not found")
 
 
 def get_filesystem_uuid() -> str:
     """Get root filesystem UUID.
-    
+
     Returns
     -------
     str
         Filesystem UUID or "Not found" if unavailable.
     """
-    identifiers = get_identifiers()
+    identifiers = get_system_identifiers()
     return identifiers.get("Filesystem UUID", "Not found")
 
 
 def get_hostname() -> str:
     """Get system hostname.
-    
+
     Returns
     -------
     str
         Hostname or "Not found" if unavailable.
     """
-    identifiers = get_identifiers()
+    identifiers = get_system_identifiers()
     return identifiers.get("Hostname", "Not found")
