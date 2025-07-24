@@ -68,10 +68,127 @@ def check_system_requirements() -> bool:
         return False
 
 
-# Generate random MAC address
-def rand_mac() -> str:
-    mac_parts: list[str] = [f"{random.randint(0, 255):02x}" for _ in range(5)]
-    return "02:" + ":".join(mac_parts)
+def rand_mac(*, locally_admin: bool = True, unicast: bool = True) -> str:
+    """Return a random MAC address.
+
+    Parameters
+    ----------
+    locally_admin : bool, optional
+        If True (default), set the locally administered bit (LAA).
+        This indicates the MAC address is locally assigned rather than
+        globally unique from the manufacturer.
+    unicast : bool, optional
+        If True (default), clear the multicast bit to ensure unicast addressing.
+
+    Returns
+    -------
+    str
+        A randomly generated MAC address in the format "xx:xx:xx:xx:xx:xx".
+
+    Notes
+    -----
+    - Setting locally_admin=True sets bit 1 of the first octet (0x02)
+    - Setting unicast=True clears bit 0 of the first octet (0xFE mask)
+    - This ensures the generated MAC follows proper addressing conventions
+    """
+    first = random.randint(0, 255)
+
+    if locally_admin:
+        first |= 0x02  # Set LAA (Locally Administered Address) bit
+    else:
+        first &= ~0x02  # Clear LAA bit for globally unique addresses
+
+    if unicast:
+        first &= 0xFE  # Clear multicast bit for unicast addressing
+
+    # Generate remaining 5 octets
+    parts = [first] + [random.randint(0, 255) for _ in range(5)]
+
+    return ":".join(f"{p:02x}" for p in parts)
+
+
+def validate_mac_address(mac: str) -> bool:
+    """Validate MAC address format.
+
+    Parameters
+    ----------
+    mac : str
+        MAC address string to validate.
+
+    Returns
+    -------
+    bool
+        True if valid MAC address format, False otherwise.
+    """
+    import re
+
+    # Match standard MAC address formats: xx:xx:xx:xx:xx:xx or xx-xx-xx-xx-xx-xx
+    pattern = r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$"
+    return bool(re.match(pattern, mac))
+
+
+def get_network_interfaces() -> dict[str, dict[str, str]]:
+    """Get information about available network interfaces.
+
+    Returns
+    -------
+    dict[str, dict[str, str]]
+        Dictionary mapping interface names to their properties.
+        Each interface dict contains: 'mac', 'state', 'type'
+    """
+    interfaces = {}
+
+    try:
+        # Get interface information
+        result = run_cmd("ip -o link show", timeout=10)
+        lines = result.strip().split("\n")
+
+        for line in lines:
+            if ":" not in line:
+                continue
+
+            parts = line.split(":")
+            if len(parts) < 3:
+                continue
+
+            # Extract interface name (remove @ suffix if present)
+            iface_name = parts[1].strip().split("@")[0]
+
+            # Skip loopback
+            if iface_name == "lo" or "LOOPBACK" in line:
+                continue
+
+            # Extract MAC address
+            mac = "Unknown"
+            if "link/ether" in line:
+                mac_part = line.split("link/ether")[1].split()[0]
+                if validate_mac_address(mac_part):
+                    mac = mac_part
+
+            # Extract state
+            state = "DOWN"
+            if "state UP" in line:
+                state = "UP"
+            elif "state DOWN" in line:
+                state = "DOWN"
+            elif "state UNKNOWN" in line:
+                state = "UNKNOWN"
+
+            # Determine interface type
+            iface_type = "ethernet"
+            if "link/ether" in line:
+                iface_type = "ethernet"
+            elif "link/none" in line:
+                iface_type = "virtual"
+            elif "link/sit" in line:
+                iface_type = "tunnel"
+
+            interfaces[iface_name] = {"mac": mac, "state": state, "type": iface_type}
+
+    except (CmdError, Exception) as e:
+        print(f"Error getting network interfaces: {e}", file=sys.stderr)
+
+    return interfaces
 
 
 def get_identifiers() -> dict[str, str]:
