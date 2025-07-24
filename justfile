@@ -2,7 +2,7 @@
 help:
     @just --list
 
-# Run spoofer as module
+# Run spoofer as a module
 run:
     sudo -E $(which uv) run python -m src
 
