@@ -12,7 +12,7 @@ from .panel import (
 )
 from .progress import ProgressBar
 from .table import (
-    OPTIONS,
+    OPTIONS_DESCRIPTION,
     draw_comparison_table,
     draw_options_table,
     draw_system_identifiers_table,
@@ -34,7 +34,7 @@ __all__ = [
     # Progress
     "ProgressBar",
     # Table
-    "OPTIONS",
+    "OPTIONS_DESCRIPTION",
     "draw_comparison_table",
     "draw_options_table",
     "draw_system_identifiers_table",

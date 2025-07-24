@@ -2,7 +2,7 @@ from rich.table import Table
 
 from ..utils import get_system_identifiers
 
-OPTIONS = [
+OPTIONS_DESCRIPTION = [
     {"name": "MAC Address", "description": "Spoof network interface MAC address"},
     {"name": "Machine ID", "description": "Regenerate system machine-id"},
     {"name": "Filesystem UUID", "description": "Randomize root filesystem UUID"},
@@ -17,7 +17,7 @@ def draw_options_table() -> Table:
     table.add_column("Feature", style="yellow", width=20)
     table.add_column("Description", style="white", width=40)
 
-    for option in OPTIONS:
+    for option in OPTIONS_DESCRIPTION:
         table.add_row(option["name"], option["description"])
 
     return table
