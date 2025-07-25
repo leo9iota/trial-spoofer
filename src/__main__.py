@@ -8,4 +8,5 @@ from src.core.app import App
 
 if __name__ == "__main__":
     app: App = App()
+    app.run()
     sys.exit(0)
