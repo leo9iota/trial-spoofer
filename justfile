@@ -13,7 +13,3 @@ run:
 # Run tests
 test:
     uv run pytest tests/ -v
-
-# Run tests with short output
-test-short:
-    uv run pytest tests/
