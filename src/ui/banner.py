@@ -6,6 +6,7 @@ Banner Class (banner.py)
 Prints the banner for the application.
 """
 
+import random
 import time
 
 from rich.console import Console
@@ -55,23 +56,53 @@ class Banner:
         """
         self.console = console or Console()
 
-    def animate_banner(self, delay: float = 0.1, style: str = "bold cyan") -> None:
+    def animate_banner(self, delay: float = 0.035) -> None:
         """
-        Animate the banner by printing it line by line.
+        Matrix-style animation where random characters morph into the banner.
 
         Args:
-            delay: Delay in seconds between each line (default: 0.1)
-            style: Rich style string for the banner text (default: "bold cyan")
+            delay: Delay between animation frames
         """
-        self.console.print()  # Empty line before banner
+        self.console.print()
 
-        # Split the banner into individual lines
         banner_lines: list[LiteralString] = BANNER.strip().split("\n")
+        matrix_chars = "01!@#$%^&*()_+-=[]|;:,.<>/?"
 
+        # Create matrix version first
+        matrix_lines: list[str] = []
         for line in banner_lines:
-            # Create styled text for each line
-            line_text: Text = Text(text=line, style=style)
-            self.console.print(line_text)
+            matrix_line = ""
+            for char in line:
+                if char != " " and char != "_":
+                    matrix_line += random.choice(seq=matrix_chars)
+                else:
+                    matrix_line += char
+            matrix_lines.append(matrix_line)
+
+        # Animate transformation
+        for frame in range(15):  # 15 frames of animation
+            self.console.clear()
+            self.console.print()
+
+            for _, line in enumerate[LiteralString](banner_lines):
+                display_line: str = ""
+                for _, char in enumerate[str](line):
+                    if random.random() < (frame / 14):  # Gradually reveal
+                        display_line += char
+                    else:
+                        if char != " " and char != "_":
+                            display_line += random.choice(seq=matrix_chars)
+                        else:
+                            display_line += char
+
+                line_text: Text = Text(text=display_line, style="bold cyan")
+                self.console.print(line_text)
+
             time.sleep(delay)
 
-        self.console.print()  # Empty line after banner
+        # Final reveal with cyan color
+        self.console.clear()
+        self.console.print()
+        for line in banner_lines:
+            self.console.print(Text(text=line, style="bold cyan"))
+        self.console.print()
