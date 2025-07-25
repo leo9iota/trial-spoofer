@@ -8,6 +8,15 @@ Run Linux shell commands.
 
 import shlex
 import subprocess
+from enum import Enum
+
+
+class ReturnMode(Enum):
+    """Return mode for command execution."""
+
+    RAISE_ON_ERROR = "raise"  # Default: raise exceptions on error
+    SILENT = "silent"  # Return bool success/failure
+    RAW = "raw"  # Return (code, stdout, stderr) tuple
 
 
 class CommandError(RuntimeError):
@@ -55,37 +64,33 @@ class Command:
     def run(
         self,
         command: str,
-        check: bool = True,
+        mode: ReturnMode = ReturnMode.RAISE_ON_ERROR,
         capture_output: bool = True,
-        silent: bool = False,
-        unchecked: bool = False,
     ) -> str | bool | tuple[int, str, str]:
         """
         Execute a shell command with configurable behavior.
 
         Args:
             command: The shell command to execute
-            check: Whether to raise CommandError on non-zero exit codes
-            (ignored if silent or unchecked)
+            mode: How to handle command results and errors:
+                - RAISE_ON_ERROR: Raise CommandError on non-zero exit (default)
+                - SILENT: Return boolean success/failure
+                - RAW: Return (return_code, stdout, stderr) tuple
             capture_output: Whether to capture stdout/stderr
-            silent: If True, return boolean success/failure instead of output
-            unchecked: If True, return (return_code, stdout, stderr) tuple without
-            exceptions
 
         Returns:
-            - str: stdout output (default behavior)
-            - bool: success status (if silent=True)
-            - tuple[int, str, str]: (return_code, stdout, stderr) (if unchecked=True)
+            - str: stdout output (if mode=RAISE_ON_ERROR)
+            - bool: success status (if mode=SILENT)
+            - tuple[int, str, str]: (return_code, stdout, stderr) (if mode=RAW)
 
         Raises:
-            CommandError: If the command fails and check=True (unless silent or unchecked)
-            subprocess.TimeoutExpired: If the command times out
-            (unless silent or unchecked)
+            CommandError: If the command fails and mode=RAISE_ON_ERROR
+            subprocess.TimeoutExpired: If the command times out and mode=RAISE_ON_ERROR
         """
         try:
             if self.shell:
                 # Run through shell for complex commands with pipes, etc.
-                result: subprocess.CompletedProcess[str] = subprocess.run(
+                result = subprocess.run(
                     command,
                     shell=True,
                     timeout=self.timeout,
@@ -105,16 +110,16 @@ class Command:
                 )
 
             # Handle different return modes
-            if unchecked:
+            if mode == ReturnMode.RAW:
                 # Return all information without exceptions
                 return result.returncode, result.stdout, result.stderr
 
-            if silent:
+            if mode == ReturnMode.SILENT:
                 # Return boolean success/failure
                 return result.returncode == 0
 
-            # Default behavior: check for errors and return stdout
-            if check and result.returncode != 0:
+            # RAISE_ON_ERROR mode: check for errors and return stdout
+            if result.returncode != 0:
                 stdout = result.stdout if capture_output else ""
                 stderr = result.stderr if capture_output else ""
                 raise CommandError(
@@ -127,11 +132,11 @@ class Command:
             return result.stdout if capture_output else ""
 
         except subprocess.TimeoutExpired as e:
-            if unchecked:
+            if mode == ReturnMode.RAW:
                 return -1, "", "Command timed out"
-            if silent:
+            if mode == ReturnMode.SILENT:
                 return False
-            # Re-raise timeout exceptions with additional context for default behavior
+            # Re-raise timeout exceptions for RAISE_ON_ERROR mode
             raise subprocess.TimeoutExpired(
                 cmd=command,
                 timeout=float(self.timeout or 30),
@@ -139,9 +144,9 @@ class Command:
                 stderr=e.stderr,
             ) from e
         except FileNotFoundError as e:
-            if unchecked:
+            if mode == ReturnMode.RAW:
                 return -1, "", f"Command not found: {str(e)}"
-            if silent:
+            if mode == ReturnMode.SILENT:
                 return False
             # Handle cases where the command/executable doesn't exist
             raise CommandError(
