@@ -3,11 +3,11 @@ help:
     just --list
 
 # Run spoofer as a module
-run:
+mod:
     sudo -E $(which uv) run python -m src
 
 # Run spoofer directly
-run-direct:
+run:
     sudo -E $(which uv) run python src/main.py
 
 # Run tests
