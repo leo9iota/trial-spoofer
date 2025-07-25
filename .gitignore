@@ -158,3 +158,6 @@ cython_debug/
 # Application specific
 tmp_rovodev_*
 .vscode-spoofer-backups/
+
+# Cursor settings
+.cursor-settings
