@@ -26,14 +26,14 @@ class Message:
 
     def error(self, message: str, title: str = "Error") -> None:
         """
-        Display an error message in a red box.
+        Display an error message in a red message.
 
         Args:
             message: The error message to display
-            title: The title for the error box (default: "Error")
+            title: The title for the error message (default: "Error")
         """
-        panel = Panel(
-            Text(message, style="white"),
+        panel: Panel = Panel(
+            renderable=Text(text=message, style="white"),
             title=f"[bold red]{title}[/bold red]",
             border_style="red",
             padding=(1, 2),
@@ -42,14 +42,14 @@ class Message:
 
     def warning(self, message: str, title: str = "Warning") -> None:
         """
-        Display a warning message in a yellow box.
+        Display a warning message in a yellow message.
 
         Args:
             message: The warning message to display
-            title: The title for the warning box (default: "Warning")
+            title: The title for the warning message (default: "Warning")
         """
-        panel = Panel(
-            Text(message, style="black"),
+        panel: Panel = Panel(
+            renderable=Text(text=message, style="black"),
             title=f"[bold yellow]{title}[/bold yellow]",
             border_style="yellow",
             padding=(1, 2),
@@ -58,14 +58,14 @@ class Message:
 
     def success(self, message: str, title: str = "Success") -> None:
         """
-        Display a success message in a green box.
+        Display a success message in a green message.
 
         Args:
             message: The success message to display
-            title: The title for the success box (default: "Success")
+            title: The title for the success message (default: "Success")
         """
-        panel = Panel(
-            Text(message, style="white"),
+        panel: Panel = Panel(
+            renderable=Text(text=message, style="white"),
             title=f"[bold green]{title}[/bold green]",
             border_style="green",
             padding=(1, 2),
@@ -74,14 +74,14 @@ class Message:
 
     def info(self, message: str, title: str = "Info") -> None:
         """
-        Display an info message in a blue box.
+        Display an info message in a blue message.
 
         Args:
             message: The info message to display
-            title: The title for the info box (default: "Info")
+            title: The title for the info message (default: "Info")
         """
-        panel = Panel(
-            Text(message, style="white"),
+        panel: Panel = Panel(
+            renderable=Text(text=message, style="white"),
             title=f"[bold blue]{title}[/bold blue]",
             border_style="blue",
             padding=(1, 2),
@@ -97,47 +97,47 @@ class Message:
         text_color: str = "white",
     ) -> None:
         """
-        Display a custom styled message box.
+        Display a custom styled message message.
 
         Args:
             message: The message to display
-            title: The title for the box
+            title: The title for the message
             border_color: Color for the border
             title_color: Color for the title
             text_color: Color for the message text
         """
-        panel = Panel(
-            Text(message, style=text_color),
+        panel: Panel = Panel(
+            renderable=Text(text=message, style=text_color),
             title=f"[bold {title_color}]{title}[/bold {title_color}]",
             border_style=border_color,
             padding=(1, 2),
         )
         self.console.print(panel)
 
-    def display(self, message: str, box_type: str = "info") -> None:
+    def display(self, message: str, message_type: str = "info") -> None:
         """
-        Display a message using the specified box type.
+        Display a message using the specified message type.
 
         Args:
             message: The message to display
-            box_type: Type of box ('error', 'warning', 'success', 'info')
+            message_type: Type of message ('error', 'warning', 'success', 'info')
         """
-        box_type = box_type.lower()
-        if box_type == "error":
+        msg_type: str = message_type.lower()
+        if msg_type == "error":
             self.error(message)
-        elif box_type == "warning":
+        elif msg_type == "warning":
             self.warning(message)
-        elif box_type == "success":
+        elif msg_type == "success":
             self.success(message)
-        elif box_type == "info":
+        elif msg_type == "info":
             self.info(message)
         else:
             self.info(message)  # Default to info if unknown type
 
     def __str__(self) -> str:
-        """Return string representation of the Box class."""
-        return "Box(console=<Rich Console>)"
+        """Return string representation of the Message class."""
+        return "Message(console=<Rich Console>)"
 
     def __repr__(self) -> str:
-        """Return detailed string representation of the Box class."""
-        return f"Box(console={self.console!r})"
+        """Return detailed string representation of the Message class."""
+        return f"Message(console={self.console!r})"
