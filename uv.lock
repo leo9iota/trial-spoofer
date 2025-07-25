@@ -872,7 +872,7 @@ wheels = [
 ]
 
 [[package]]
-name = "vscode-spoofer"
+name = "trial-spoofer"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
