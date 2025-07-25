@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Command Class
+Command Class (command.py)
 
 Run Linux shell commands.
 """
@@ -100,7 +100,7 @@ class Command:
                 )
             else:
                 # Parse command into arguments for safer execution
-                args = shlex.split(command)
+                args: list[str] = shlex.split(command)
                 result = subprocess.run(
                     args,
                     timeout=self.timeout,
@@ -120,8 +120,8 @@ class Command:
 
             # RAISE_ON_ERROR mode: check for errors and return stdout
             if result.returncode != 0:
-                stdout = result.stdout if capture_output else ""
-                stderr = result.stderr if capture_output else ""
+                stdout: str = result.stdout if capture_output else ""
+                stderr: str = result.stderr if capture_output else ""
                 raise CommandError(
                     failed_command=command,
                     return_code=result.returncode,
