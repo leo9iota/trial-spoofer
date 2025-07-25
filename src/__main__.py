@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-"""Entry point for running VSCode Spoofer as a module."""
+"""Entry point for running Trial Spoofer as a module."""
 
 import sys
 
-from .main import main
+from src.core.app import App
 
 if __name__ == "__main__":
-    sys.exit(main())
+    app: App = App()
+    sys.exit(0)
