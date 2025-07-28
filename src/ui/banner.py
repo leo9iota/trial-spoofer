@@ -56,7 +56,7 @@ class Banner:
         """
         self.console = console or Console()
 
-    def animate_banner(self, delay: float = 0.035) -> None:
+    def animate_banner(self, delay: float = 0.02) -> None:
         """
         Matrix-style animation where random characters morph into the banner.
 
